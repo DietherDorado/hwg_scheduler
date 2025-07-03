@@ -19,6 +19,7 @@ const events = [
       therapist: "Shannon Lee",
       description: "First sample event to test rendering.",
       room: "Blue Room",
+      client: "Diether Dorado",
       service: "Individual",
       frequency: "none"
     }
@@ -146,11 +147,6 @@ const therapists = [
       Friday: [{ start: '09:00', end: '17:00' }],
     }
   }
-];
-
-const clients = [
-  { id: 1, name: 'Jane Doe' },
-  { id: 2, name: 'John Smith' }
 ];
 
 // Routes

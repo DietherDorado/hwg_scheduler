@@ -12,6 +12,8 @@ export default {
     data() {
         return {
             showModal: false,
+            showEventModal: false,
+            selectedEvent: null,
             selectedTherapist: 'All',
             therapistMap: {},
             unavailableBackgrounds: [],
@@ -67,6 +69,9 @@ export default {
                 selectMirror: true,
                 select: this.handleSlotSelect,
                 selectAllow: this.selectAllow,
+                selectedEvent: null,
+                showEventModal: false,
+                eventClick: this.handleEventClick,
                 eventSources: [], // will be filled with data later
             }
         }
@@ -75,7 +80,7 @@ export default {
         fetch('http://localhost:3000/events')
             .then(res => res.json())
             .then(data => {
-                this.calendarOptions.allEvents = data.map(event => ({
+                this.allEvents = data.map(event => ({
                     ...event,
                     start: new Date(event.start),
                     end: new Date(event.end)
@@ -194,9 +199,11 @@ export default {
                     backgroundColor: roomColor,
                     extendedProps: {
                         therapist: this.form.therapist,
+                        client: this.form.client,
                         description: this.form.description,
                         room: this.form.room,
-                        service: this.form.service
+                        service: this.form.service,
+                        frequency: this.form.frequency
                     }
                 };
 
@@ -323,15 +330,19 @@ export default {
             }
 
             successCallback(unavailableEvents);
+        },
+        handleEventClick(info) {
+            this.selectedEvent = info.event;
+            this.showEventModal = true;
         }
 
     },
     computed: {
         filteredEvents() {
             if (this.selectedTherapist === 'All') {
-                return this.calendarOptions.allEvents || [];
+                return this.allEvents || [];
             }
-            return (this.calendarOptions.allEvents || []).filter(
+            return (this.allEvents || []).filter(
                 event => event.extendedProps?.therapist === this.selectedTherapist
             );
         }
@@ -450,8 +461,33 @@ export default {
         </div>
     </div>
 
+    <!-- Event Details Modal -->
+     <div v-if="showEventModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 >Session Details</h2>
+            <p align="left"><strong>Title:</strong> {{ selectedEvent?.title }}</p>
+            <p align="left"><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</p>
+            <p align="left"><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</p>
+            <p align="left"><strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}</p>
+            <p align="left"><strong>Description:</strong> {{ selectedEvent?.extendedProps?.description }}</p>
+            <p align="left">
+                <strong>Time:</strong>
+                {{ new Date(selectedEvent?.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                -
+                {{ new Date(selectedEvent?.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+            </p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" @click="showEventModal = false">Close</button>
+            </div>
+        </div>
+     </div>
+
+
     <!-- FullCalendar component -->
-    <FullCalendar ref="fullCalendar" :options="calendarOptions" />
+    <FullCalendar 
+        ref="fullCalendar" 
+        :options="calendarOptions"
+    />
 
     <!-- Footer -->
     <footer class="bg-light text-center py-4">
