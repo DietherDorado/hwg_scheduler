@@ -69,8 +69,6 @@ export default {
                 selectMirror: true,
                 select: this.handleSlotSelect,
                 selectAllow: this.selectAllow,
-                selectedEvent: null,
-                showEventModal: false,
                 eventClick: this.handleEventClick,
                 eventSources: [], // will be filled with data later
             }
@@ -104,7 +102,10 @@ export default {
                         events: this.getUnavailableBackgrounds,
                         color: '#a0a0a0', // light gray for unavailable times
                         textColor: 'transparent',
-                        display: 'background'
+                        display: 'background',
+                        editable: false,
+                        overlap: false,
+                        groupId: 'unavailable'
                     },
                     {
                         events: (fetchInfo, successCallback) => {
@@ -359,7 +360,7 @@ export default {
 <template>
     <div class="bg-light p-4 rounded shadow-sm mb-4 text-center">
         <h1 class="display-4 text-primary fw-bold my-4 d-flex justify-content-center align-items-center gap-3">
-            <img src="/hwg.svg" alt="HWG Logo" style="width: 50px; height: 50px;" />
+            <img src="/hwg.svg" alt="HWG Logo" class="logo-spin" style="width: 50px; height: 50px;" />
             HWG Scheduler
         </h1>
         <p class="lead text-center text-muted">Easily manage therapist schedules and client sessions</p>
@@ -464,7 +465,7 @@ export default {
     <!-- Event Details Modal -->
      <div v-if="showEventModal" class="modal-overlay">
         <div class="modal-content">
-            <h2 >Session Details</h2>
+            <h2><strong>Session Details</strong></h2>
             <p align="left"><strong>Title:</strong> {{ selectedEvent?.title }}</p>
             <p align="left"><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</p>
             <p align="left"><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</p>

@@ -49,6 +49,7 @@ const therapists = [
       Friday: [],
     }
   },
+
   { id: 3, name: 'Brian', availability: {
       Monday: [],
       Tuesday: [],
@@ -59,6 +60,7 @@ const therapists = [
       Sunday: [],
     }
   },
+  
   { id: 4, name: 'Rachel', availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],

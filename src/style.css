@@ -79,6 +79,14 @@
   border-radius: 6px;
   overflow-wrap: break-word;
   white-space: normal;
+  cursor: pointer;
+}
+
+.fc .fc-event:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .fc-event-time {
@@ -115,4 +123,18 @@
 .fc .fc-timegrid-col .fc-event-time {
   font-size: 12.5px;
   font-weight: 600;
+}
+
+.logo-spin {
+  animation: spin 5s infinite linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
