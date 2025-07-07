@@ -54,6 +54,10 @@ export default {
                     timeGridWeek: {
                         slotMinTime: '07:00:00',
                         slotMaxTime: '21:00:00',
+                        slotDuration: '00:30:00',
+                        selectMinDistance: 1,
+                        selectLongPressDelay: 0,
+                        eventLongPressDelay: 0,
                     }
                 },
                 weekends: true,
@@ -67,9 +71,13 @@ export default {
                 eventContent: this.renderEventContent,
                 selectable: true,
                 selectMirror: true,
-                select: this.handleSlotSelect,
-                selectAllow: this.selectAllow,
-                eventClick: this.handleEventClick,
+                selectMinDistance: 1,
+                longPressDelay: 0,
+                selectLongPressDelay: 0,
+                eventLongPressDelay: 0,
+                select: null,
+                selectAllow: null,
+                eventClick: null,
                 eventSources: [], // will be filled with data later
             }
         }
@@ -117,8 +125,35 @@ export default {
                 const calendarApi = this.$refs.fullCalendar?.getApi?.();
                 if (calendarApi) calendarApi.refetchEvents();
             })
+
+        this.calendarOptions.select = this.handleSlotSelect;
+        this.calendarOptions.selectAllow = this.selectAllow;
+        this.calendarOptions.eventClick = this.handleEventClick;
+
+        this.$nextTick(() => {
+            const calendarApi = this.$refs.fullCalendar?.getApi?.();
+            if (calendarApi) {
+                calendarApi.setOption('select', this.handleSlotSelect);
+                calendarApi.setOption('selectAllow', this.selectAllow);
+                calendarApi.setOption('eventClick', this.handleEventClick);
+            }
+        });
     },
     methods: {
+        handleEventClick(info) {
+            // Prevent clicking on background events
+            if (info.event.classNames.includes('unavailable-slot')) {
+                info.jsEvent.preventDefault();
+                return;
+            }
+            this.selectedEvent = info.event;
+            this.showEventModal = true;
+        },
+        selectAllow(selectInfo) {
+            const allowed = this.isWithinTherapistAvailability(selectInfo.start, selectInfo.end);
+            console.log("Clicked slot from:", selectInfo.start, "to", selectInfo.end, "| Allowed?", allowed);
+            return allowed;
+        },
         closeModal() {
             this.showModal = false
             this.form = {
@@ -140,28 +175,14 @@ export default {
             this.form.start = start.toISOString().slice(0, 16) // Format to datetime-local
             this.form.end = end.toISOString().slice(0, 16) // Format to datetime-local
 
+            if (this.selectedTherapist !== 'All') {
+                this.form.therapist = this.selectedTherapist;
+            }
+
             this.showModal = true
 
             const calendarApi = this.$refs.fullCalendar?.getApi?.();
             calendarApi?.unselect(); // Clear any previous selection
-        },
-        selectAllow(selectInfo) {
-            const calendarApi = this.$refs.fullCalendar?.getApi?.();
-            const events = calendarApi?.getEvents?.() || [];
-
-            const duration = selectInfo.end - selectInfo.start;
-            const isOneHour = duration === 60 * 60 * 1000; // 1 hour in milliseconds
-
-
-            const isAvailable = !events.some(event => 
-                event.display === 'background' &&
-                (
-                    selectInfo.start < event.end &&
-                    selectInfo.end > event.start
-                )
-            );
-
-            return isOneHour && isAvailable;
         },
         submitEvent() {
             const roomColor = this.rooms[this.form.room] || '#000000' // Default color if room not found
@@ -307,10 +328,12 @@ export default {
 
                 if (blockStart > lastEnd) {
                     unavailableEvents.push({
-                    start: lastEnd.toISOString(),
+                        start: lastEnd.toISOString(),
                         end: blockStart.toISOString(),
-                    display: 'background',
-                    groupId: 'unavailable'
+                        display: 'background',
+                        classNames: ['unavailable-slot'],
+                        groupId: 'unavailable',
+                        editable: false
                     });
                 }
 
@@ -325,18 +348,40 @@ export default {
                     start: lastEnd.toISOString(),
                     end: fullDayEnd.toISOString(),
                     display: 'background',
-                    groupId: 'unavailable'
+                    classNames: ['unavailable-slot'],
+                    groupId: 'unavailable',
+                    editable: false
                 });
                 }
             }
 
             successCallback(unavailableEvents);
         },
-        handleEventClick(info) {
-            this.selectedEvent = info.event;
-            this.showEventModal = true;
-        }
+        isWithinTherapistAvailability(start, end) {
+            const therapist = this.therapistMap[this.selectedTherapist];
+            if (!therapist || !therapist.availability) return false;
 
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayName = dayNames[start.getDay()];
+            const availableBlocks = therapist.availability[dayName] || [];
+
+            for (let block of availableBlocks) {
+                const [blockStartHour, blockStartMin] = block.start.split(':').map(Number);
+                const [blockEndHour, blockEndMin] = block.end.split(':').map(Number);
+
+                const blockStart = new Date(start);
+                blockStart.setHours(blockStartHour, blockStartMin, 0, 0);
+
+                const blockEnd = new Date(start);
+                blockEnd.setHours(blockEndHour, blockEndMin, 0, 0);
+
+                if (start >= blockStart && end <= blockEnd) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     },
     computed: {
         filteredEvents() {
@@ -465,7 +510,7 @@ export default {
     <!-- Event Details Modal -->
      <div v-if="showEventModal" class="modal-overlay">
         <div class="modal-content">
-            <h2><strong>Session Details</strong></h2>
+            <h2><strong>Session Details ✍️</strong></h2>
             <p align="left"><strong>Title:</strong> {{ selectedEvent?.title }}</p>
             <p align="left"><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</p>
             <p align="left"><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</p>
@@ -486,7 +531,7 @@ export default {
 
     <!-- FullCalendar component -->
     <FullCalendar 
-        ref="fullCalendar" 
+        ref="fullCalendar"
         :options="calendarOptions"
     />
 
