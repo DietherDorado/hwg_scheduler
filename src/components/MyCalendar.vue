@@ -667,7 +667,7 @@ export default {
 
     <div class="calendar-header d-flex justify-content-between align-items-center mb-3 px-3">
         <button @click="showModal = true" class="btn btn-primary">📝 Schedule Client</button>
-        <button @click="logout" class="btn btn-outline-danger">🚪 Logout</button>
+        <button @click="logout" class="btn btn-danger">🚪 Logout</button>
     </div>
 
     <div class="therapist-filter" style="margin: 1rem 0;">
