@@ -1,8 +1,8 @@
-
 <template>
-    <MyCalendar />
-</template>
-
-<script setup>
-import MyCalendar from './components/MyCalendar.vue'
-</script>
+    <router-view />
+  </template>
+  
+  <script setup>
+  // no need to import anything here now
+  </script>
+  

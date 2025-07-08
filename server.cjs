@@ -12,6 +12,7 @@ const oneHourLater = new Date(today.getTime() + 60 * 60 * 1000); // 1 hour later
 
 const events = [
   {
+    id: 0,
     title: "Initial Test Session",
     start: today.toISOString(),
     end: oneHourLater.toISOString(),
@@ -31,6 +32,8 @@ const therapists = [
   {
     id: 1,
     name: 'Shannon Lee',
+    email: 'shannon.l@healingwithgrace.com',
+    role: 'admin',
     availability: {
       Monday: [{ start: '10:00', end: '18:00' }],
       Tuesday: [{ start: '10:00', end: '18:00' }],
@@ -40,8 +43,11 @@ const therapists = [
     }
   },
 
-
-  { id: 2, name: 'Kana Nootenboon', availability: {
+  {
+    id: 2, name: 'Kana Nootenboon',
+    email: 'kana.n@healingwithgrace.com',
+    role: 'admin',
+    availability: {
       Monday: [{ start: '13:00', end: '19:00' }],
       Tuesday: [{ start: '13:00', end: '19:00' }],
       Wednesday: [],
@@ -50,7 +56,11 @@ const therapists = [
     }
   },
 
-  { id: 3, name: 'Brian', availability: {
+  {
+    id: 3, name: 'Brian',
+    email: 'brian@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [],
       Tuesday: [],
       Wednesday: [{ start: '10:00', end: '19:00' }],
@@ -60,8 +70,12 @@ const therapists = [
       Sunday: [],
     }
   },
-  
-  { id: 4, name: 'Rachel', availability: {
+
+  {
+    id: 4, name: 'Rachel',
+    email: 'rachel@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
       Wednesday: [],
@@ -69,7 +83,11 @@ const therapists = [
       Friday: [{ start: '09:00', end: '17:00' }],
     }
   },
-  { id: 5, name: 'Marija', availability: {
+  {
+    id: 5, name: 'Marija',
+    email: 'marija@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
       Wednesday: [],
@@ -77,7 +95,11 @@ const therapists = [
       Friday: [{ start: '09:00', end: '17:00' }],
     }
   },
-  { id: 6, name: 'Suzy', availability: {
+  {
+    id: 6, name: 'Suzy',
+    email: 'suzy@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
       Wednesday: [],
@@ -85,7 +107,11 @@ const therapists = [
       Friday: [{ start: '09:00', end: '17:00' }],
     }
   },
-  { id: 7, name: 'Renata', availability: {
+  {
+    id: 7, name: 'Renata',
+    email: 'renata@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
       Wednesday: [],
@@ -93,7 +119,11 @@ const therapists = [
       Friday: [{ start: '09:00', end: '17:00' }],
     }
   },
-  { id: 8, name: 'Arisa', availability: {
+  {
+    id: 8, name: 'Arisa',
+    email: 'arisa@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
       Wednesday: [],
@@ -101,7 +131,11 @@ const therapists = [
       Friday: [{ start: '09:00', end: '17:00' }],
     }
   },
-  { id: 9, name: 'Jericho', availability: {
+  {
+    id: 9, name: 'Jericho',
+    email: 'jericho@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
       Wednesday: [],
@@ -109,7 +143,11 @@ const therapists = [
       Friday: [{ start: '09:00', end: '17:00' }],
     }
   },
-  { id: 10, name: 'Fay (Ranniya)', availability: {
+  {
+    id: 10, name: 'Fay (Ranniya)',
+    email: 'fay@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
       Wednesday: [],
@@ -117,7 +155,11 @@ const therapists = [
       Friday: [{ start: '09:00', end: '17:00' }],
     }
   },
-  { id: 11, name: 'Dr. Leon', availability: {
+  {
+    id: 11, name: 'Dr. Leon',
+    email: 'leon@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
       Wednesday: [],
@@ -125,7 +167,11 @@ const therapists = [
       Friday: [{ start: '09:00', end: '17:00' }],
     }
   },
-  { id: 12, name: 'Stephanie', availability: {
+  {
+    id: 12, name: 'Stephanie',
+    email: 'stephanie@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
       Wednesday: [],
@@ -133,7 +179,11 @@ const therapists = [
       Friday: [{ start: '09:00', end: '17:00' }],
     }
   },
-  { id: 13, name: 'Sophia', availability: {
+  {
+    id: 13, name: 'Sophia',
+    email: 'sophia@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
       Wednesday: [],
@@ -141,7 +191,11 @@ const therapists = [
       Friday: [{ start: '09:00', end: '17:00' }],
     }
   },
-  { id: 14, name: 'Mishelle', availability: {
+  {
+    id: 14, name: 'Mishelle',
+    email: 'mishelle@healingwithgrace.com',
+    role: 'user',
+    availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
       Wednesday: [],
@@ -156,6 +210,8 @@ app.get('/events', (req, res) => res.json(events));
 app.get('/therapists', (req, res) => res.json(therapists));
 app.get('/clients', (req, res) => res.json(clients));
 
+let nextEventId = 1;
+
 // Handle POST request to add a new event
 app.post('/events', (req, res) => {
   const newEvent = req.body;
@@ -164,10 +220,31 @@ app.post('/events', (req, res) => {
     return res.status(400).json({ message: 'Missing event fields' });
   }
 
+  newEvent.id = nextEventId++;
   events.push(newEvent);
   res.status(201).json({ message: 'Event added', event: newEvent });
 });
 
+// Handle POST request to add a new therapist
+app.post('/therapists', (req, res) => {
+  const newTherapist = req.body;
+  newTherapist.id = therapists.length + 1;
+  therapists.push(newTherapist);
+  res.status(201).json(newTherapist);
+});
+
+// Handle POST request to delete event
+app.delete('/events/:id', (req, res) => {
+  const eventId = parseInt(req.params.id)
+  const index = events.findIndex(event => event.id === eventId)
+
+  if (index === -1) {
+    return res.status(404).json({ message: 'Event not found' })
+  }
+
+  events.splice(index, 1)
+  res.json({ message: 'Event deleted' })
+})
 
 // Start server
 app.listen(PORT, () => {

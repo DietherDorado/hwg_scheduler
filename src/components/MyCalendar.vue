@@ -4,6 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import listPlugin from '@fullcalendar/list'
 import BootstrapTheme from '@fullcalendar/bootstrap5'
+import { useRouter } from 'vue-router'
 
 export default {
     components: {
@@ -11,6 +12,8 @@ export default {
     },
     data() {
         return {
+            user: null,
+            isAdmin: false,
             showModal: false,
             showEventModal: false,
             selectedEvent: null,
@@ -29,6 +32,21 @@ export default {
                 description: ''
             },
             therapists: [],
+            showAddTherapistModal: false,
+            newTherapist: {
+                name: '',
+                email: '',
+                role: 'user',
+                availability: {
+                    Sunday: [],
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    Saturday: []
+                }
+            },
             services: [
                 'Intake', 'Individual', 'Couples', 'Family',
                 'Teletherapy', 'KAP Integration', 'KAP Dosing',
@@ -83,6 +101,17 @@ export default {
         }
     },
     mounted() {
+        const router = useRouter();
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+
+        if (!storedUser) {
+            router.push('/');
+            return;
+        }
+
+        this.user = storedUser;
+        this.isAdmin = this.user.role === 'admin';
+
         fetch('http://localhost:3000/events')
             .then(res => res.json())
             .then(data => {
@@ -381,6 +410,125 @@ export default {
             }
 
             return false;
+        },
+        markEventStatus(statusType) {
+            if (!this.selectedEvent) return;
+
+            const emoji = statusType === 'cancelled' ? '❌' : '❓';
+            const statusText = statusType === 'cancelled' ? 'Cancelled' : 'No-Show';
+
+            const originalTitle = this.selectedEvent.title;
+
+            if (originalTitle.includes(emoji) || originalTitle.includes('❌') || originalTitle.includes('❓')) {
+                alert(`This session is already marked as ${statusText}.`);
+                return;
+            }
+
+            const newTitle = `${emoji} ${originalTitle}`;
+            this.selectedEvent.setProp('title', newTitle);
+
+            fetch(`http://localhost:3000/events/${this.selectedEvent.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title: newTitle})
+            }).then(() => {
+                this.showEventModal = false;
+            }).catch(err => {
+                console.error("Failed to update event status:", err);
+                alert(`Error marking session as ${statusText}. Please try again.`);
+            })
+        },
+        removeEventStatus() {
+            if (!this.selectedEvent) return;
+
+            const cleanTitle = this.selectedEvent.title
+                .replace(/^❌\s*/, '')
+                .replace(/^❓\s*/, '');
+
+            if (cleanTitle === this.selectedEvent.title) {
+                alert("This session is not marked as cancelled or no-show.");
+                return;
+            }
+
+            this.selectedEvent.setProp('title', cleanTitle);
+
+            fetch(`http://localhost:3000/events/${this.selectedEvent.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title: cleanTitle })
+            }).then(() => {
+                this.showEventModal = false;
+            }).catch(err => {
+                console.error("Failed to clear event status:", err);
+                alert("Error clearing session status. Please try again.");
+            });
+        },
+        logout() {
+            localStorage.removeItem('user')
+            this.$router.push('/')
+        },
+        deleteEvent() {
+            if (!this.selectedEvent) return;
+
+            const confirmed = confirm("Are you sure you want to delete this session? This action cannot be undone.");
+            if (!confirmed) return;
+
+            fetch(`http://localhost:3000/events/${this.selectedEvent.id}`, {
+                method: 'DELETE'
+            })
+            .then(() => {
+                this.selectedEvent.remove();
+                this.showEventModal = false;
+            })
+                .catch(err => {
+                console.error('Failed to delete event:', err);
+                alert('Error deleting session. Please try again.');
+            });
+        },
+        submitNewTherapist() {
+            fetch(`http://localhost:3000/therapists`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.newTherapist)
+            })
+            .then(res => res.json())
+                .then(() => {
+                    this.showAddTherapistModal = false;
+                    alert('New therapist added successfully!');
+                return fetch('http://localhost:3000/therapists');
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.therapists = data.sort((a, b) => a.name.localeCompare(b.name));
+                this.therapistMap = {};
+                data.forEach(t => { this.therapistMap[t.name] = t });
+            })
+            .catch(err => {
+                console.error('Failed to add new therapist:', err);
+                alert('Error adding new therapist. Please try again.');
+            })
+        },
+        resetNewTherapistForm() {
+            this.newTherapist = {
+                name: '',
+                email: '',
+                role: 'user',
+                availability: {
+                    Sunday: [],
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    Saturday: []
+                }
+            };
         }
     },
     computed: {
@@ -406,13 +554,22 @@ export default {
     <div class="bg-light p-4 rounded shadow-sm mb-4 text-center">
         <h1 class="display-4 text-primary fw-bold my-4 d-flex justify-content-center align-items-center gap-3">
             <img src="/hwg.svg" alt="HWG Logo" class="logo-spin" style="width: 50px; height: 50px;" />
-            HWG Scheduler
+            HWG Scheduler <small v-if="user" class="ms-3 fs-5 text-muted">– Welcome, {{ user.name }}</small>
         </h1>
         <p class="lead text-center text-muted">Easily manage therapist schedules and client sessions</p>
     </div>
 
-    <div class="calendar-header">
+    <div v-if="isAdmin" class="admin-banner">
+        <span>👑 You are logged in as <strong>Admin</strong></span>
+    </div>
+
+    <div v-if="isAdmin" class="text-end mb-3">
+        <button class="btn btn-success" @click="resetNewTherapistForm(); showAddTherapistModal = true">➕ Add Therapist</button>
+    </div>
+
+    <div class="calendar-header d-flex justify-content-between align-items-center mb-3 px-3">
         <button @click="showModal = true" class="btn btn-primary">📝 Schedule Client</button>
+        <button @click="logout" class="btn btn-outline-danger">🚪 Logout</button>
     </div>
 
     <div class="therapist-filter" style="margin: 1rem 0;">
@@ -507,6 +664,26 @@ export default {
         </div>
     </div>
 
+    <!-- Add New Therapist Modal -->
+    <div v-if="showAddTherapistModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Add New Therapist</h2>
+            <form @submit.prevent="submitNewTherapist">
+                <input v-model="newTherapist.name" placeholder="Name" required />
+                <input v-model="newTherapist.email" type="email" placeholder="Email" required />
+                <select v-model="newTherapist.role">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <div class="modal-buttons">
+                    <button class="btn btn-success" type="submit">Save</button>
+                    <button class="btn btn-secondary" type="button" @click="showAddTherapistModal = false">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     <!-- Event Details Modal -->
      <div v-if="showEventModal" class="modal-overlay">
         <div class="modal-content">
@@ -522,8 +699,26 @@ export default {
                 -
                 {{ new Date(selectedEvent?.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
             </p>
-            <div class="modal-buttons">
-                <button class="btn btn-secondary" @click="showEventModal = false">Close</button>
+            <div class="modal-buttons" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button class="btn" style="background-color: #e63946; color: white;" @click="markEventStatus('cancelled')">
+                    ❌ Cancelled
+                </button>
+                <button class="btn" style="background-color: #ff9f1c; color: white;" @click="markEventStatus('no-show')">
+                    ❓ No-Show
+                </button>
+                <button class="btn" style="background-color: #6c757d; color: white;" @click="removeEventStatus">
+                    🔄 Clear
+                </button>
+                <button class="btn btn-secondary" @click="showEventModal = false">
+                    ✖ Close
+                </button>
+                <button 
+                    v-if="isAdmin"
+                    class="btn btn-danger"
+                    @click="deleteEvent"
+                >
+                    🗑️ Delete
+                </button>
             </div>
         </div>
      </div>
