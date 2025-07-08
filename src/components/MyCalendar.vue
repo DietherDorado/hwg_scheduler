@@ -6,6 +6,16 @@ import listPlugin from '@fullcalendar/list'
 import BootstrapTheme from '@fullcalendar/bootstrap5'
 import { useRouter } from 'vue-router'
 
+const authFetch = async (urlencoded, options = {}) => {
+    const token = localStorage.getItem('token')
+    const headers = {
+        ...options.headers,
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    }
+    return fetch(urlencoded, { ...options, headers })
+}
+
 export default {
     components: {
         FullCalendar
@@ -116,7 +126,7 @@ export default {
         this.user = storedUser;
         this.isAdmin = this.user.role === 'admin';
 
-        fetch('http://localhost:3000/events')
+        authFetch('http://localhost:3000/events')
             .then(res => res.json())
             .then(data => {
                 this.allEvents = data.map(event => ({
@@ -129,7 +139,7 @@ export default {
                 console.error('Failed to load events:', err)
             })
 
-        fetch('http://localhost:3000/therapists')
+        authFetch('http://localhost:3000/therapists')
             .then(res => res.json())
             .then(data => {
                 this.therapists = data.sort((a, b) => a.name.localeCompare(b.name));
@@ -279,7 +289,7 @@ export default {
 
             // Submit each event to backend
             Promise.all(events.map(event =>
-                fetch('http://localhost:3000/events', {
+                authFetch('http://localhost:3000/events', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -289,7 +299,7 @@ export default {
                     .then(res => res.json())
             ))
                 .then(() => {
-                    return fetch('http://localhost:3000/events')
+                    return authFetch('http://localhost:3000/events')
                         .then(res => res.json())
                         .then(data => {
                             this.allEvents = data.map(event => ({
@@ -444,7 +454,7 @@ export default {
             const newTitle = `${emoji} ${originalTitle}`;
             this.selectedEvent.setProp('title', newTitle);
 
-            fetch(`http://localhost:3000/events/${this.selectedEvent.id}`, {
+            authFetch(`http://localhost:3000/events/${this.selectedEvent.id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -471,7 +481,7 @@ export default {
 
             this.selectedEvent.setProp('title', cleanTitle);
 
-            fetch(`http://localhost:3000/events/${this.selectedEvent.id}`, {
+            authFetch(`http://localhost:3000/events/${this.selectedEvent.id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -501,7 +511,7 @@ export default {
             this.showEventModal = false;
 
             // Continue with API request in background
-            fetch(`http://localhost:3000/events/${eventToDelete.id}`, {
+            authFetch(`http://localhost:3000/events/${eventToDelete.id}`, {
                 method: 'DELETE'
             }).catch(err => {
                 console.error('Failed to delete event:', err);
@@ -510,7 +520,7 @@ export default {
             });
         },
         submitNewTherapist() {
-            fetch(`http://localhost:3000/therapists`, {
+            authFetch(`http://localhost:3000/therapists`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -521,7 +531,7 @@ export default {
                 .then(() => {
                     this.showAddTherapistModal = false;
                     alert('New therapist added successfully!');
-                return fetch('http://localhost:3000/therapists');
+                return authFetch('http://localhost:3000/therapists');
             })
             .then(res => res.json())
             .then(data => {
@@ -567,7 +577,7 @@ export default {
             this.showTherapistDropdown = false;
         },
         saveEditedTherapist() {
-            fetch(`http://localhost:3000/therapists/${this.selectedTherapistForEdit.id}`, {
+            authFetch(`http://localhost:3000/therapists/${this.selectedTherapistForEdit.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(this.selectedTherapistForEdit)
@@ -575,7 +585,7 @@ export default {
                 .then(() => {
                     alert('Therapist updated successfully!');
                     this.showEditTherapistModal = false;
-                    return fetch('http://localhost:3000/therapists');
+                    return authFetch('http://localhost:3000/therapists');
                 })
                 .then(res => res.json())
                 .then(data => {
@@ -588,13 +598,13 @@ export default {
             const confirmDelete = confirm("Are you sure you want to delete this therapist? This action cannot be undone.");
             if (!confirmDelete) return;
 
-            fetch(`http://localhost:3000/therapists/${id}`, {
+            authFetch(`http://localhost:3000/therapists/${id}`, {
                 method: 'DELETE'
             })
             .then(() => {
                 alert('Therapist deleted successfully!');
                 this.showDeleteTherapistModal = false;
-                return fetch('http://localhost:3000/therapists');
+                return authFetch('http://localhost:3000/therapists');
             })
             .then(res => res.json())
             .then(data => {

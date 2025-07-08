@@ -23,6 +23,19 @@
             <label for="emailInput">Email address</label>
             </div>
 
+            <!-- Password Input -->
+            <div class="form-floating mb-3">
+              <input
+                v-model="password"
+                type="password"
+                class="form-control rounded-3"
+                id="passwordInput"
+                placeholder="Enter your password"
+                autocomplete="off"
+              />
+              <label for="passwordInput">Password</label>
+            </div>
+
             <!-- Login Button -->
             <button type="submit" class="btn btn-primary w-100 rounded-pill py-2">
             🚪 Login
@@ -45,30 +58,32 @@
   import { useRouter } from 'vue-router'
   
   const email = ref('')
+  const password = ref('')
   const error = ref('')
   const router = useRouter()
   const users = ref([])
   
-  onMounted(async () => {
+  const login = async () => {
+    error.value = ''
     try {
-      const response = await fetch('http://localhost:3000/therapists')
-      if (!response.ok) throw new Error('Failed to fetch therapists')
-      users.value = await response.json()
-    } catch (err) {
-      console.error('Error loading users:', err)
-      error.value = 'Error loading user data. Please try again later.'
-    }
-  })
-  
-  const login = () => {
-    const normalized = email.value.trim().toLowerCase()
-    const user = users.value.find(u => u.email.toLowerCase() === normalized)
-  
-    if (user) {
+      const res = await fetch('http://localhost:3000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.value, password: password.value })
+      })
+
+      if (!res.ok) {
+        const { message } = await res.json()
+        throw new Error(message || 'Login failed')
+      }
+
+      const { user, token } = await res.json()
       localStorage.setItem('user', JSON.stringify(user))
+      localStorage.setItem('token', token)
       router.push('/calendar')
-    } else {
-      error.value = 'Invalid email. Please try again.'
+    } catch (err) {
+      console.error(err)
+      error.value = err.message || 'Something went wrong. Please try again.'
     }
   }
   </script>

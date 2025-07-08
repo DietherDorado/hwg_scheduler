@@ -3,6 +3,9 @@ const cors = require('cors');
 const app = express();
 const PORT = 3000;
 
+const jwt = require('jsonwebtoken');
+const secretKey = process.env.JWT_SECRET || 'supersecretkey';
+
 app.use(cors());
 app.use(express.json());
 
@@ -27,13 +30,16 @@ const events = [
   }
 ];
 
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
-const therapists = [
+const therapistData = [
   {
     id: 1,
     name: 'Shannon Lee',
     email: 'shannon.l@healingwithgrace.com',
     role: 'admin',
+    password: 'password123',
     availability: {
       Monday: [{ start: '10:00', end: '18:00' }],
       Tuesday: [{ start: '10:00', end: '18:00' }],
@@ -47,6 +53,7 @@ const therapists = [
     id: 2, name: 'Kana Nootenboon',
     email: 'kana.n@healingwithgrace.com',
     role: 'admin',
+    password: 'password123',
     availability: {
       Monday: [{ start: '13:00', end: '19:00' }],
       Tuesday: [{ start: '13:00', end: '19:00' }],
@@ -60,6 +67,7 @@ const therapists = [
     id: 3, name: 'Brian',
     email: 'brian@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [],
       Tuesday: [],
@@ -75,6 +83,7 @@ const therapists = [
     id: 4, name: 'Rachel',
     email: 'rachel@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
@@ -87,6 +96,7 @@ const therapists = [
     id: 5, name: 'Marija',
     email: 'marija@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
@@ -99,6 +109,7 @@ const therapists = [
     id: 6, name: 'Suzy',
     email: 'suzy@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
@@ -111,6 +122,7 @@ const therapists = [
     id: 7, name: 'Renata',
     email: 'renata@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
@@ -123,6 +135,7 @@ const therapists = [
     id: 8, name: 'Arisa',
     email: 'arisa@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
@@ -135,6 +148,7 @@ const therapists = [
     id: 9, name: 'Jericho',
     email: 'jericho@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
@@ -147,6 +161,7 @@ const therapists = [
     id: 10, name: 'Fay (Ranniya)',
     email: 'fay@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
@@ -159,6 +174,7 @@ const therapists = [
     id: 11, name: 'Dr. Leon',
     email: 'leon@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
@@ -171,6 +187,7 @@ const therapists = [
     id: 12, name: 'Stephanie',
     email: 'stephanie@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
@@ -183,6 +200,7 @@ const therapists = [
     id: 13, name: 'Sophia',
     email: 'sophia@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
@@ -195,6 +213,7 @@ const therapists = [
     id: 14, name: 'Mishelle',
     email: 'mishelle@healingwithgrace.com',
     role: 'user',
+    password: 'password123',
     availability: {
       Monday: [{ start: '09:00', end: '17:00' }],
       Tuesday: [{ start: '09:00', end: '17:00' }],
@@ -205,12 +224,59 @@ const therapists = [
   }
 ];
 
+const therapists = therapistData.map(t => ({
+  ...t,
+  password: bcrypt.hashSync(t.password, saltRounds) // Hash passwords
+}))
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Access token missing' });
+
+  jwt.verify(token, secretKey, (err, user) => {
+    if (err) return res.status(403).json({ message: 'Invalid token' });
+    req.user = user;
+    next();
+  });
+}
+
 // Routes
-app.get('/events', (req, res) => res.json(events));
-app.get('/therapists', (req, res) => res.json(therapists));
-app.get('/clients', (req, res) => res.json(clients));
+app.get('/events', authenticateToken, (req, res) => res.json(events));
+app.get('/therapists', authenticateToken, (req, res) => {
+  const publicTherapists = therapists.map(({ _password, ...rest }) => rest);
+  res.json(publicTherapists);
+});
 
 let nextEventId = 1;
+
+// Handle POST request to login
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = therapists.find(t => t.email === email);
+  if (!user) {
+    return res.status(401).json({ message: 'Invalid email or password' });
+  }
+
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) {
+    return res.status(401).json({ message: 'Invalid email or password' });
+  }
+
+  const token = jwt.sign(
+    { id: user.id, email: user.email, role: user.role },
+    secretKey,
+    { expiresIn: '2h' }
+  );
+
+  res.json({
+    message: 'Login successful',
+    token,
+    user: { id: user.id, name: user.name, role: user.role }
+  });
+});
+
 
 // Handle POST request to add a new event
 app.post('/events', (req, res) => {
@@ -226,11 +292,19 @@ app.post('/events', (req, res) => {
 });
 
 // Handle POST request to add a new therapist
-app.post('/therapists', (req, res) => {
+app.post('/therapists', async (req, res) => {
   const newTherapist = req.body;
+
+  if (!newTherapist.password) {
+    return res.status(400).json({ message: 'Password required' });
+  }
+
   newTherapist.id = therapists.length + 1;
+  newTherapist.password = await bcrypt.hash(newTherapist.password, saltRounds);
+
   therapists.push(newTherapist);
-  res.status(201).json(newTherapist);
+  const { _password, ...publicData } = newTherapist;
+  res.status(201).json({ message: 'Therapist added', therapist: publicData });
 });
 
 // Handle POST request to delete event
