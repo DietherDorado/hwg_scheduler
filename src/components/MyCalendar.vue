@@ -32,7 +32,11 @@ export default {
                 description: ''
             },
             therapists: [],
+            showTherapistDropdown: false,
             showAddTherapistModal: false,
+            showEditTherapistModal: false,
+            showDeleteTherapistModal: false,
+            selectedTherapistForEdit: null,
             newTherapist: {
                 name: '',
                 email: '',
@@ -167,8 +171,19 @@ export default {
                 calendarApi.setOption('eventClick', this.handleEventClick);
             }
         });
+
+        document.addEventListener('click', this.handleClickOutsideDropdown);
+    },
+    beforeUnmount() {
+        document.removeEventListener('click', this.handleClickOutsideDropdown);
     },
     methods: {
+        handleClickOutsideDropdown(e) {
+            const dropdown = this.$refs.therapistDropdownRef;
+            if (dropdown && !dropdown.contains(e.target)) {
+                this.showTherapistDropdown = false;
+            }
+        },
         handleEventClick(info) {
             // Prevent clicking on background events
             if (info.event.classNames.includes('unavailable-slot')) {
@@ -272,19 +287,21 @@ export default {
                     body: JSON.stringify(event)
                 })
                     .then(res => res.json())
-                    .then(data => {
-                        this.calendarOptions.events.push({
-                            ...data.event,
-                            start: new Date(data.event.start),
-                            end: new Date(data.event.end)
-                        });
-                    })
             ))
+                .then(() => {
+                    return fetch('http://localhost:3000/events')
+                        .then(res => res.json())
+                        .then(data => {
+                            this.allEvents = data.map(event => ({
+                                ...event,
+                                start: new Date(event.start),
+                                end: new Date(event.end)
+                            }))
+                            const calendarApi = this.$refs.fullCalendar?.getApi?.();
+                            calendarApi?.refetchEvents();
+                        })
+                })
                 .then(() => this.closeModal())
-                .catch(err => {
-                    console.error('Failed to submit event:', err);
-                    alert('Error scheduling event. Please try again.');
-                });
         },
         renderEventContent(arg) {
             const event = arg.event;
@@ -477,16 +494,19 @@ export default {
             const confirmed = confirm("Are you sure you want to delete this session? This action cannot be undone.");
             if (!confirmed) return;
 
-            fetch(`http://localhost:3000/events/${this.selectedEvent.id}`, {
+            const eventToDelete = this.selectedEvent;
+
+            // Immediate UI feedback
+            eventToDelete.remove();
+            this.showEventModal = false;
+
+            // Continue with API request in background
+            fetch(`http://localhost:3000/events/${eventToDelete.id}`, {
                 method: 'DELETE'
-            })
-            .then(() => {
-                this.selectedEvent.remove();
-                this.showEventModal = false;
-            })
-                .catch(err => {
+            }).catch(err => {
                 console.error('Failed to delete event:', err);
-                alert('Error deleting session. Please try again.');
+                alert('Error deleting session. Please refresh the page.');
+                // Optionally re-fetch events here if needed
             });
         },
         submitNewTherapist() {
@@ -529,6 +549,76 @@ export default {
                     Saturday: []
                 }
             };
+        },
+        toggleTherapistDropdown() {
+            this.showTherapistDropdown = !this.showTherapistDropdown;
+        },
+        openAddTherapistModal() {
+            this.resetNewTherapistForm();
+            this.showAddTherapistModal = true;
+            this.showTherapistDropdown = false;
+        },
+        openEditTherapistModal() {
+            this.showEditTherapistModal = true;
+            this.showTherapistDropdown = false;
+        },
+        openDeleteTherapistModal() {
+            this.showDeleteTherapistModal = true;
+            this.showTherapistDropdown = false;
+        },
+        saveEditedTherapist() {
+            fetch(`http://localhost:3000/therapists/${this.selectedTherapistForEdit.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(this.selectedTherapistForEdit)
+                })
+                .then(() => {
+                    alert('Therapist updated successfully!');
+                    this.showEditTherapistModal = false;
+                    return fetch('http://localhost:3000/therapists');
+                })
+                .then(res => res.json())
+                .then(data => {
+                    this.therapists = data.sort((a, b) => a.name.localeCompare(b.name));
+                    this.therapistMap = {};
+                    data.forEach(t => {this.therapistMap[t.name] = t });
+                })
+        },
+        deleteTherapist(id) {
+            const confirmDelete = confirm("Are you sure you want to delete this therapist? This action cannot be undone.");
+            if (!confirmDelete) return;
+
+            fetch(`http://localhost:3000/therapists/${id}`, {
+                method: 'DELETE'
+            })
+            .then(() => {
+                alert('Therapist deleted successfully!');
+                this.showDeleteTherapistModal = false;
+                return fetch('http://localhost:3000/therapists');
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.therapists = data.sort((a, b) => a.name.localeCompare(b.name));
+                    this.therapistMap = {};
+                    data.forEach(t => { this.therapistMap[t.name] = t });
+                })
+        },
+        getDayTime(day, type) {
+            const dayBlocks = this.selectedTherapistForEdit.availability[day]
+            if (!dayBlocks || dayBlocks.length === 0) return '';
+            return dayBlocks[0][type] || '';
+        },
+        updateAvailability(day, type, value) {
+            const avail = this.selectedTherapistForEdit.availability;
+
+            if (!avail[day] || avail[day].length === 0) {
+                avail[day] = [{ start: '', end: '' }];
+            }
+
+            avail[day][0][type] = value;
+        },
+        clearAvailability(day) {
+            this.selectedTherapistForEdit.availability[day] = [];
         }
     },
     computed: {
@@ -563,9 +653,17 @@ export default {
         <span>👑 You are logged in as <strong>Admin</strong></span>
     </div>
 
-    <div v-if="isAdmin" class="text-end mb-3">
-        <button class="btn btn-success" @click="resetNewTherapistForm(); showAddTherapistModal = true">➕ Add Therapist</button>
+    <div class="dropdown" ref="therapistDropdownRef" style="position: relative; display: inline-block;">
+        <button class="btn btn-success" @click="toggleTherapistDropdown">
+            ⚙️ Manage Therapists
+        </button>
+        <div v-if="showTherapistDropdown" class="dropdown-menu show">
+            <button class="dropdown-item" @click="openAddTherapistModal">➕ Add Therapist</button>
+            <button class="dropdown-item" @click="openEditTherapistModal">✏️ Edit Therapists</button>
+            <button class="dropdown-item" @click="openDeleteTherapistModal">🗑️ Delete Therapists</button>
+        </div>
     </div>
+
 
     <div class="calendar-header d-flex justify-content-between align-items-center mb-3 px-3">
         <button @click="showModal = true" class="btn btn-primary">📝 Schedule Client</button>
@@ -664,28 +762,8 @@ export default {
         </div>
     </div>
 
-    <!-- Add New Therapist Modal -->
-    <div v-if="showAddTherapistModal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>Add New Therapist</h2>
-            <form @submit.prevent="submitNewTherapist">
-                <input v-model="newTherapist.name" placeholder="Name" required />
-                <input v-model="newTherapist.email" type="email" placeholder="Email" required />
-                <select v-model="newTherapist.role">
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                </select>
-                <div class="modal-buttons">
-                    <button class="btn btn-success" type="submit">Save</button>
-                    <button class="btn btn-secondary" type="button" @click="showAddTherapistModal = false">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-
     <!-- Event Details Modal -->
-     <div v-if="showEventModal" class="modal-overlay">
+     <div v-if="showEventModal" class="modal-overlay" @click.self="showEventModal = false">
         <div class="modal-content">
             <h2><strong>Session Details ✍️</strong></h2>
             <p align="left"><strong>Title:</strong> {{ selectedEvent?.title }}</p>
@@ -722,6 +800,148 @@ export default {
             </div>
         </div>
      </div>
+
+
+    <!-- Add New Therapist Modal -->
+    <div v-if="showAddTherapistModal" class="modal-overlay" @click.self="showAddTherapistModal = false">
+        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%;">
+            <h3 class="text-center mb-4 text-success fw-bold">Add New Therapist</h3>
+
+            <form @submit.prevent="submitNewTherapist">
+            <div class="mb-3">
+                <label class="form-label">Full Name</label>
+                <input v-model="newTherapist.name" type="text" class="form-control" placeholder="Enter full name" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input v-model="newTherapist.email" type="email" class="form-control" placeholder="Enter email" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Role</label>
+                <select v-model="newTherapist.role" class="form-select">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                </select>
+            </div>
+
+        <!-- Optional future: Add availability picker -->
+
+        <div class="d-flex justify-content-between mt-4">
+            <button class="btn btn-success w-50 me-2" type="submit">➕ Add</button>
+            <button class="btn btn-secondary w-50" type="button" @click="showAddTherapistModal = false">✖ Cancel</button>
+        </div>
+        </form>
+    </div>
+    </div>
+
+    <!-- Edit Therapist Modal -->
+    <div v-if="showEditTherapistModal" class="modal-overlay" @click.self="showEditTherapistModal = false">
+        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%;">
+            <h3 class="text-center mb-4 text-primary fw-bold">Edit Therapist</h3>
+
+            <div class="mb-3">
+            <label class="form-label">Select Therapist</label>
+            <select v-model="selectedTherapistForEdit" class="form-select">
+                <option disabled value="">-- Choose --</option>
+                <option v-for="t in therapists" :key="t.id" :value="t">{{ t.name }}</option>
+            </select>
+            </div>
+
+            <div v-if="selectedTherapistForEdit">
+            <div class="mb-3">
+                <label class="form-label">Full Name</label>
+                <input type="text" v-model="selectedTherapistForEdit.name" class="form-control" placeholder="Enter name" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" v-model="selectedTherapistForEdit.email" class="form-control" placeholder="Enter email" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Availability</label>
+
+                <div 
+                    v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" 
+                    :key="day"
+                    class="mb-2"
+                >
+                    <div class="d-flex align-items-center gap-2">
+                    <strong style="width: 90px;">{{ day }}</strong>
+
+                    <input
+                        type="time"
+                        class="form-control form-control-sm"
+                        style="max-width: 130px;"
+                        :value="getDayTime(day, 'start')"
+                        @change="updateAvailability(day, 'start', $event.target.value)"
+                    />
+                    <span>to</span>
+                    <input
+                        type="time"
+                        class="form-control form-control-sm"
+                        style="max-width: 130px;"
+                        :value="getDayTime(day, 'end')"
+                        @change="updateAvailability(day, 'end', $event.target.value)"
+                    />
+                    <button class="btn btn-sm btn-outline-danger" @click="clearAvailability(day)">❌</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="mb-3">
+                <label class="form-label">Role</label>
+                <select v-model="selectedTherapistForEdit.role" class="form-select">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                </select>
+            </div>
+
+            <!-- Optional future availability editor -->
+
+            <div class="d-flex justify-content-between mt-4">
+                <button class="btn btn-primary w-50 me-2" @click="saveEditedTherapist">💾 Save</button>
+                <button class="btn btn-secondary w-50" @click="showEditTherapistModal = false">✖ Cancel</button>
+            </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Therapist Modal -->
+    <div v-if="showDeleteTherapistModal" class="modal-overlay" @click.self="showDeleteTherapistModal = false">
+        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 420px; max-width: 90%;">
+            <h3 class="text-center mb-4 text-danger fw-bold">Delete Therapist</h3>
+
+            <p class="text-muted text-center mb-3">Select a therapist you wish to remove from the system:</p>
+
+            <ul class="list-group mb-4">
+            <li 
+                v-for="t in therapists" 
+                :key="t.id" 
+                class="list-group-item d-flex justify-content-between align-items-center"
+            >
+                <div>
+                <strong>{{ t.name }}</strong><br />
+                <small class="text-muted">{{ t.email }}</small>
+                </div>
+                <button 
+                class="btn btn-outline-danger btn-sm"
+                @click="deleteTherapist(t.id)"
+                >
+                🗑️ Delete
+                </button>
+            </li>
+            </ul>
+
+            <div class="text-center">
+            <button class="btn btn-secondary w-100" @click="showDeleteTherapistModal = false">✖ Cancel</button>
+            </div>
+        </div>
+    </div>
+
 
 
     <!-- FullCalendar component -->

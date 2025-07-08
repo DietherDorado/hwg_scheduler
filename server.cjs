@@ -246,6 +246,39 @@ app.delete('/events/:id', (req, res) => {
   res.json({ message: 'Event deleted' })
 })
 
+// Handle PATCH to request to edit a therapist
+app.patch('/therapists/:id', (req, res) => {
+  const therapistId = parseInt(req.params.id);
+  const updatedData = req.body;
+
+  const index = therapists.findIndex(t => t.id === therapistId);
+  if (index === -1) {
+    return res.status(404).json({ error: 'Therapist not found' });
+  }
+
+  // Merge the new data into the existing therapist object
+  therapists[index] = {
+    ...therapists[index],
+    ...updatedData
+  };
+
+  res.json({ message: 'Therapist updated successfully', therapist: therapists[index] });
+});
+
+// Handle POST request to delete a therapist
+app.delete('/therapists/:id', (req, res) => {
+  const therapistId = parseInt(req.params.id);
+  const index = therapists.findIndex(t => t.id === therapistId);
+  
+  if (index === -1) {
+    return res.status(404).json({ error: 'Therapist not found' });
+  }
+
+  therapists.splice(index, 1);
+  res.json({ message: 'Therapist deleted successfully' });
+});
+
+
 // Start server
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
