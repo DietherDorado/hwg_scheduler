@@ -763,43 +763,43 @@ export default {
     </div>
 
     <!-- Event Details Modal -->
-     <div v-if="showEventModal" class="modal-overlay" @click.self="showEventModal = false">
-        <div class="modal-content">
-            <h2><strong>Session Details ✍️</strong></h2>
-            <p align="left"><strong>Title:</strong> {{ selectedEvent?.title }}</p>
-            <p align="left"><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</p>
-            <p align="left"><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</p>
-            <p align="left"><strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}</p>
-            <p align="left"><strong>Description:</strong> {{ selectedEvent?.extendedProps?.description }}</p>
-            <p align="left">
+    <div v-if="showEventModal" class="modal-overlay" @click.self="showEventModal = false">
+        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 500px; max-width: 95%;">
+            <h3 class="text-center text-primary fw-bold mb-4">Session Details ✍️</h3>
+
+            <ul class="list-unstyled text-start mb-4" style="line-height: 1.8;">
+            <li><strong>Title:</strong> {{ selectedEvent?.title }}</li>
+            <li><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</li>
+            <li><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</li>
+            <li><strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}</li>
+            <li><strong>Description:</strong> {{ selectedEvent?.extendedProps?.description }}</li>
+            <li>
                 <strong>Time:</strong>
-                {{ new Date(selectedEvent?.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-                -
-                {{ new Date(selectedEvent?.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-            </p>
-            <div class="modal-buttons" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px;">
-                <button class="btn" style="background-color: #e63946; color: white;" @click="markEventStatus('cancelled')">
-                    ❌ Cancelled
-                </button>
-                <button class="btn" style="background-color: #ff9f1c; color: white;" @click="markEventStatus('no-show')">
-                    ❓ No-Show
-                </button>
-                <button class="btn" style="background-color: #6c757d; color: white;" @click="removeEventStatus">
-                    🔄 Clear
-                </button>
-                <button class="btn btn-secondary" @click="showEventModal = false">
-                    ✖ Close
-                </button>
-                <button 
-                    v-if="isAdmin"
-                    class="btn btn-danger"
-                    @click="deleteEvent"
-                >
-                    🗑️ Delete
-                </button>
+                {{
+                new Date(selectedEvent?.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }} – 
+                {{
+                new Date(selectedEvent?.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }}
+            </li>
+            </ul>
+
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+            <button class="btn btn-danger" @click="markEventStatus('cancelled')">❌ Cancelled</button>
+            <button class="btn btn-warning text-white" @click="markEventStatus('no-show')">❓ No-Show</button>
+            <button class="btn btn-outline-primary" @click="removeEventStatus">🔄 Clear</button>
+            <button class="btn btn-dark" @click="showEventModal = false">✖ Close</button>
+            <button 
+                v-if="isAdmin"
+                class="btn btn-outline-danger"
+                @click="deleteEvent"
+            >
+                🗑️ Delete
+            </button>
             </div>
         </div>
-     </div>
+    </div>
+
 
 
     <!-- Add New Therapist Modal -->
