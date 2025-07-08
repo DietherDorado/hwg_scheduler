@@ -653,7 +653,7 @@ export default {
         <span>👑 You are logged in as <strong>Admin</strong></span>
     </div>
 
-    <div class="dropdown" ref="therapistDropdownRef" style="position: relative; display: inline-block;">
+    <div v-if="isAdmin" class="dropdown" ref="therapistDropdownRef" style="position: relative; display: inline-block;">
         <button class="btn btn-success" @click="toggleTherapistDropdown">
             ⚙️ Manage Therapists
         </button>
