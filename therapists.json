@@ -1,0 +1,531 @@
+[
+  {
+    "id": 1,
+    "name": "Shannon Lee",
+    "email": "shannon.l@healingwithgrace.com",
+    "role": "admin",
+    "password": "$2b$10$rdJpNdok.HQCYWWFpQfrLOT3DT6oO0DF6WTiYdoIo4d29wdytMkFi",
+    "availability": {
+      "Monday": [
+        {
+          "start": "10:00",
+          "end": "18:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "10:00",
+          "end": "18:00"
+        }
+      ],
+      "Wednesday": [
+        {
+          "start": "10:00",
+          "end": "18:00"
+        }
+      ],
+      "Thursday": [
+        {
+          "start": "10:00",
+          "end": "18:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "10:00",
+          "end": "18:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": "2025-07-12",
+      "end": "2025-07-19"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Kana Nootenboon",
+    "email": "kana.n@healingwithgrace.com",
+    "role": "admin",
+    "password": "$2b$10$AHVVArtKsGty5QztU1Zuc.9S5S97npiGQz4QN71.5kLCxppz9ci9e",
+    "availability": {
+      "Monday": [
+        {
+          "start": "13:00",
+          "end": "19:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "13:00",
+          "end": "19:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "13:00",
+          "end": "19:00"
+        }
+      ],
+      "Friday": []
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  },
+  {
+    "id": 3,
+    "name": "Brian",
+    "email": "brian@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$xKgB64S/8qK6JZJ3gc7HgucPYrohAPJnzAadM7sE7jEG6VO.ChqY.",
+    "availability": {
+      "Monday": [],
+      "Tuesday": [],
+      "Wednesday": [
+        {
+          "start": "10:00",
+          "end": "19:00"
+        }
+      ],
+      "Thursday": [],
+      "Friday": [
+        {
+          "start": "10:00",
+          "end": "19:00"
+        }
+      ],
+      "Saturday": [
+        {
+          "start": "10:00",
+          "end": "17:00"
+        }
+      ],
+      "Sunday": []
+    },
+    "outOfOffice": {
+      "start": "2025-07-12",
+      "end": "2025-07-19"
+    }
+  },
+  {
+    "id": 4,
+    "name": "Rachel",
+    "email": "rachel@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$j8obq2otXPQelLng2pSOdOYuDR1ej1bNEaE9Cfo8FcDszWzgweMrG",
+    "availability": {
+      "Monday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  },
+  {
+    "id": 5,
+    "name": "Marija",
+    "email": "marija@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$IDAgVk/VzmiqSllJWUm6/.D5ZWyTf5KoSVSZzkqBVwndWc.by5sn6",
+    "availability": {
+      "Monday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  },
+  {
+    "id": 6,
+    "name": "Suzy",
+    "email": "suzy@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$f2TScvOrXuv9FhyDmk9amOT9vFmNxr7Ue5sigHq/FCbo5MAdi7esm",
+    "availability": {
+      "Monday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  },
+  {
+    "id": 7,
+    "name": "Renata",
+    "email": "renata@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$94MWXlyhwmz0KMprBQFJnOBLExzzpTL2/x8bFza5OPcLKdKE/n.pi",
+    "availability": {
+      "Monday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  },
+  {
+    "id": 8,
+    "name": "Arisa",
+    "email": "arisa@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$NKTSMjN1iHrREHk7VWiYveKtpk87L45H4MPEmF8EnffwxmQGxVwRi",
+    "availability": {
+      "Monday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  },
+  {
+    "id": 9,
+    "name": "Jericho",
+    "email": "jericho@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$jT820a6rHZFyied/g0F6huNpA090.3R.boatMUtHa7DtUzFBKVMxK",
+    "availability": {
+      "Monday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  },
+  {
+    "id": 10,
+    "name": "Fay (Ranniya)",
+    "email": "fay@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$yMLTmMnqiF7aI06nSOtB5.0RVuvWaqPeA5zg/Ip0G7S871.sYlWny",
+    "availability": {
+      "Monday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  },
+  {
+    "id": 11,
+    "name": "Dr. Leon",
+    "email": "leon@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$5sFgJwmnmRsbi8aqmMh9ceGe/eyaIhDnFEkO9fZaa5qISpdIZOoea",
+    "availability": {
+      "Monday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  },
+  {
+    "id": 12,
+    "name": "Stephanie",
+    "email": "stephanie@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$5RuvHbIW/FSy229.7PxFq.NpdXTuXf.1DD5m/7s6xcXpgtUXWHMau",
+    "availability": {
+      "Monday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  },
+  {
+    "id": 13,
+    "name": "Sophia",
+    "email": "sophia@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$osdj34I0dpmvpxIHHfzHG.jLy9E70OIDcJK3LIt4tVVVpZVf5jLKm",
+    "availability": {
+      "Monday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  },
+  {
+    "id": 14,
+    "name": "Mishelle",
+    "email": "mishelle@healingwithgrace.com",
+    "role": "user",
+    "password": "$2b$10$18E4bkKjgMrubRPfubI/duoQ..a7MRE3nnQZXqo/un3qKnsNKcENu",
+    "availability": {
+      "Monday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Tuesday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Wednesday": [],
+      "Thursday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ],
+      "Friday": [
+        {
+          "start": "09:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "outOfOffice": {
+      "start": null,
+      "end": null
+    }
+  }
+]

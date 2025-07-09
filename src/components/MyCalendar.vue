@@ -5,6 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import listPlugin from '@fullcalendar/list'
 import BootstrapTheme from '@fullcalendar/bootstrap5'
 import { useRouter } from 'vue-router'
+import { formatDate } from '@fullcalendar/core/index.js'
 
 const authFetch = async (urlencoded, options = {}) => {
     const token = localStorage.getItem('token')
@@ -22,10 +23,16 @@ export default {
     },
     data() {
         return {
-            user: null,
+            user: {
+                outOfOffice: {
+                    start: '',
+                    end: ''
+                }
+            },
             isAdmin: false,
             showModal: false,
             showEventModal: false,
+            showProfileDropdown: false,
             selectedEvent: null,
             selectedTherapist: 'All',
             therapistMap: {},
@@ -46,10 +53,16 @@ export default {
             showAddTherapistModal: false,
             showEditTherapistModal: false,
             showDeleteTherapistModal: false,
+            showChangePasswordModal: false,
+            showOutOfOfficeModal: false,
+            showChangeAvailabilityModal: false,
             selectedTherapistForEdit: null,
+            newPassword: '',
+            confirmPassword: '',
             newTherapist: {
                 name: '',
                 email: '',
+                password: '',
                 role: 'user',
                 availability: {
                     Sunday: [],
@@ -123,6 +136,10 @@ export default {
             return;
         }
 
+        if (!storedUser.outOfOffice) {
+            storedUser.outOfOffice = { start: '', end: '' };
+        }
+
         this.user = storedUser;
         this.isAdmin = this.user.role === 'admin';
 
@@ -183,15 +200,35 @@ export default {
         });
 
         document.addEventListener('click', this.handleClickOutsideDropdown);
+        document.addEventListener('click', this.handleClickOutsideProfileDropdown);
+
+        if (!this.user.availability) {
+            this.user.availability = {
+                Monday: [], Tuesday: [], Wednesday: [],
+                Thursday: [], Friday: [], Saturday: [],
+                Sunday: []
+            }
+        }
+
+        this.user = storedUser;
     },
     beforeUnmount() {
         document.removeEventListener('click', this.handleClickOutsideDropdown);
+        document.removeEventListener('click', this.handleClickOutsideProfileDropdown);
     },
     methods: {
         handleClickOutsideDropdown(e) {
             const dropdown = this.$refs.therapistDropdownRef;
             if (dropdown && !dropdown.contains(e.target)) {
                 this.showTherapistDropdown = false;
+            }
+        },
+        handleClickOutsideProfileDropdown(e) {
+            const dropdown = this.$refs.profileDropdown;
+            const image = this.$refs.profileImage;
+
+            if (dropdown && image && !dropdown.contains(e.target) && !image.contains(e.target)) {
+                this.showProfileDropdown = false;
             }
         },
         handleEventClick(info) {
@@ -629,6 +666,134 @@ export default {
         },
         clearAvailability(day) {
             this.selectedTherapistForEdit.availability[day] = [];
+        },
+        toggleProfileDropdown() {
+            this.showProfileDropdown = !this.showProfileDropdown;
+        },
+        handleChangePassword() {
+            this.showChangePasswordModal = true;
+            this.showProfileDropdown = false;
+        },
+        handleChangeAvailability() {
+            if (!this.user.availability) {
+                this.user.availability = {
+                Monday: [], Tuesday: [], Wednesday: [],
+                Thursday: [], Friday: [], Saturday: [], Sunday: []
+                };
+            }
+
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            for (const day of days) {
+                const blocks = this.user.availability[day];
+                
+                if (!Array.isArray(blocks) || blocks.length === 0) {
+                // Default to 9–17 if nothing set
+                this.user.availability[day] = [{ start: '09:00', end: '17:00' }];
+                } else if (!blocks[0].start || !blocks[0].end) {
+                // Fill in missing values if partial
+                this.user.availability[day][0] = {
+                    start: blocks[0].start || '09:00',
+                    end: blocks[0].end || '17:00'
+                };
+                }
+            }
+
+            this.showChangeAvailabilityModal = true;
+            this.showProfileDropdown = false;
+        },
+        async submitPasswordChange() {
+            if (this.newPassword !== this.confirmPassword) {
+                alert("Passwords do not match.");
+                return;
+            }
+
+            try {
+                const res = await authFetch(`http://localhost:3000/therapists/${this.user.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ password: this.newPassword })
+                });
+                if (!res.ok) throw new Error('Failed to update password');
+                alert('Password updated successfully!');
+                this.newPassword = '';
+                this.confirmPassword = '';
+                this.showChangePasswordModal = false;
+            } catch (err) {
+                console.error('Password update error:', err);
+                alert('Error updating password.');
+            }
+        },
+        async submitAvailabilityChange() {
+            try {
+                const res = await authFetch(`http://localhost:3000/therapists/${this.user.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ availability: this.user.availability })
+                });
+                if (!res.ok) throw new Error('Failed to update availability');
+
+                alert('Availability updated successfully!');
+                this.showChangeAvailabilityModal = false;
+
+                this.therapistMap[this.user.name] = { ...this.user };
+
+                this.selectedTherapist = this.user.name;
+                const calendarApi = this.$refs.fullCalendar?.getApi?.();
+                calendarApi?.refetchEvents();
+            } catch (err) {
+                console.error('Availability update error:', err);
+                alert('Error updating availability.');
+            }
+        },
+        async submitOutOfOffice() {
+            try {
+                const res = await authFetch(`http://localhost:3000/therapists/${this.user.id}/out-of-office`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        start: this.user.outOfOffice.start,
+                        end: this.user.outOfOffice.end
+                    })
+                })
+
+                const data = await res.json();
+                this.user.outOfOffice = data.outOfOffice;
+                localStorage.setItem('user', JSON.stringify(this.user));
+
+                if (this.therapistMap[this.user.name]) {
+                    this.therapistMap[this.user.name].outOfOffice = data.outOfOffice;
+                }
+
+                await authFetch('http://localhost:3000/therapists')
+                    .then(res => res.json())
+                    .then(data => {
+                        this.therapists = data.sort((a, b) => a.name.localeCompare(b.name));
+                        this.therapistMap = {};
+                        data.forEach(t => { this.therapistMap[t.name] = t });
+                    })
+
+                this.showOutOfOfficeModal = false;
+                alert('Out-of-office updated.');
+            } catch (err) {
+                console.error('Error updating out-of-office', err);
+                alert('Failed to update.');
+            }
+        },
+        clearUserAvailability(day) {
+            this.user.availability[day] = [];
+        },
+        updateUserAvailability(day, type, value) {
+            if (!this.user.availability[day] || this.user.availability[day].length === 0) {
+                this.user.availability[day] = [{ start: '', end: '' }];
+            }
+
+            this.user.availability[day][0][type] = value;
+        },
+        formatDate(dateStr) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateStr).toLocaleDateString(undefined, options);
+        },
+        getReturnDate(end) {
+            const date = new Date(end);
+            date.setDate(date.getDate() + 1);
+            return date.toISOString().split('T')[0];
         }
     },
     computed: {
@@ -639,7 +804,16 @@ export default {
             return (this.allEvents || []).filter(
                 event => event.extendedProps?.therapist === this.selectedTherapist
             );
+        },
+        outOfOfficeTherapists() {
+            const today = new Date();
+            return this.therapists.filter(t => {
+                const start = new Date(t.outOfOffice?.start);
+                const end = new Date(t.outOfOffice?.end);
+                return start && end && today >= start && today <= end;
+            });
         }
+
     },
     watch: {
         selectedTherapist() {
@@ -674,10 +848,40 @@ export default {
         </div>
     </div>
 
+    <div v-if="user.outOfOffice && user.outOfOffice.start">
+        <strong>Out of Office:</strong><br>
+        {{ formatDate(user.outOfOffice.start) }} - {{ formatDate(user.outOfOffice.end) }}
+    </div>
+
 
     <div class="calendar-header d-flex justify-content-between align-items-center mb-3 px-3">
         <button @click="showModal = true" class="btn btn-primary">📝 Schedule Client</button>
-        <button @click="logout" class="btn btn-danger">🚪 Logout</button>
+        <!-- Profile Dropdown -->
+        <div class="dropdown position-relative">
+            <!-- Profile image -->
+            <img
+            ref="profileImage"
+            src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
+            alt="Profile"
+            class="rounded-circle"
+            style="width: 40px; height: 40px; cursor: pointer; object-fit: cover;"
+            @click="toggleProfileDropdown"
+            />
+
+            <!-- Dropdown menu -->
+            <div
+            v-if="showProfileDropdown"
+            ref="profileDropdown"
+            class="dropdown-menu show mt-2"
+            style="right: 0; left: auto; position: absolute;"
+            >
+            <button class="dropdown-item" @click="showOutOfOfficeModal = true">🚪 Set Out-of-Office Dates</button>
+            <button class="dropdown-item" @click="handleChangePassword">🔒 Change Password</button>
+            <button class="dropdown-item" @click="handleChangeAvailability">🗓️ Change Availability</button>
+            <div class="dropdown-divider"></div>
+                <button class="dropdown-item text-danger" @click="logout">🚪 Logout</button>
+            </div>
+        </div>
     </div>
 
     <div class="therapist-filter" style="margin: 1rem 0;">
@@ -695,80 +899,81 @@ export default {
     <!-- Schedule Client Modal -->
     <div v-if="showModal" class="modal-overlay">
         <div class="modal-content">
-            <h2>Schedule A Client</h2>
             <form @submit.prevent="submitEvent">
-            <div class="form-row">
-                <label>Session Title:</label>
-                <input v-model="form.title" type="text" placeholder="Enter session title" required />
-            </div>
+                <h2>📅 Schedule A Client</h2>
+                
+                <div class="modal-section">
+                    <label class="form-label">Session Title</label>
+                    <input v-model="form.title" type="text" class="form-control" placeholder="Enter session title" required />
+                </div>
 
-            
-            <div class="form-row">
-                <label>Therapists:</label>
-                <select v-model="form.therapist" required>
-                    <option disabled value="">Select a therapist</option>
-                    <option v-for="therapist in therapists" :key="therapist.id" :value="therapist.name">
+                <div class="modal-section">
+                    <div class="col-md-6">
+                    <label class="form-label">Therapist</label>
+                    <select v-model="form.therapist" class="form-select" required>
+                        <option disabled value="">Select a therapist</option>
+                        <option v-for="therapist in therapists" :key="therapist.id" :value="therapist.name">
                         {{ therapist.name }}
-                    </option>
-                </select>
-            </div>
+                        </option>
+                    </select>
+                    </div>
 
-            <div class="form-row">
-                <label>Services:</label>
-                <select v-model="form.service" required>
-                    <option disabled value="">Select a service</option>
-                    <option v-for="service in services" :key="service.id" :value="service.name">
-                        {{ service }}
-                    </option>
-                </select>
-            </div>
+                    <div class="col-md-6">
+                    <label class="form-label">Service</label>
+                    <select v-model="form.service" class="form-select" required>
+                        <option disabled value="">Select a service</option>
+                        <option v-for="service in services" :key="service" :value="service">{{ service }}</option>
+                    </select>
+                    </div>
+                </div>
 
-            <div class="form-row">
-                <label>Client Name:</label>
-                <input v-model="form.client" type="text" placeholder="Enter client name" required />
-            </div>
+                <div class="modal-section">
+                    <label class="form-label">Client Name</label>
+                    <input v-model="form.client" type="text" class="form-control" placeholder="Enter client name" required />
+                </div>
 
-            <div class="form-row">
-                <label>Room:</label>
-                <select v-model="form.room" required>
+                <div class="modal-section">
+                    <label class="form-label">Room</label>
+                    <select v-model="form.room" class="form-select" required>
                     <option disabled value="">Select a room</option>
                     <option v-for="(color, name) in rooms" :key="name" :value="name">
-                    {{ name }}
+                        {{ name }}
                     </option>
-                </select>
-            </div>
+                    </select>
+                </div>
 
-            <div class="form-row">
-                <label>Start Time:</label>
-                <input v-model="form.start" type="datetime-local" required />
-            </div>
+                <div class="modal-section">
+                    <div class="col-md-6">
+                    <label class="form-label">Start Time</label>
+                    <input v-model="form.start" type="datetime-local" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                    <label class="form-label">End Time</label>
+                    <input v-model="form.end" type="datetime-local" class="form-control" required />
+                    </div>
+                </div>
 
-            <div class="form-row">
-                <label>End Time:</label>
-                <input v-model="form.end" type="datetime-local" required />
-            </div>
+                <div class="modal-section">
+                    <label class="form-label">Description</label>
+                    <textarea v-model="form.description" class="form-control" rows="3" placeholder="Add any notes..."></textarea>
+                </div>
 
-            <div class="form-row">
-                <label>Description:</label>
-                <textarea v-model="form.description" rows="4" placeholder="Add any notes..."></textarea>
-            </div>
+                <div class="modal-section">
+                    <label class="form-label">Frequency</label>
+                    <select v-model="form.frequency" class="form-select">
+                    <option value="none">Doesn't repeat</option>
+                    <option value="daily">Every day</option>
+                    <option value="weekly">Every week</option>
+                    <option value="monthly">Every month</option>
+                    </select>
+                </div>
 
-            <div class="form-row">
-                <label>Frequency:</label>
-                <select v-model="form.frequency">
-                    <option value = "none">Doesn't repeat</option>
-                    <option value = "daily">Every day</option>
-                    <option value = "weekly">Every week</option>
-                    <option value = "monthly">Every month</option>
-                </select>
-            </div>
-            
-            <div class="modal-buttons" style="display: flex; justify-content: space-between; gap: 10px;">
-                <button class="btn btn-primary" type="submit">Submit</button>
-                <button class="btn btn-secondary" type="button" @click="closeModal">Cancel</button>
-            </div>
-
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary w-50 me-2">✅ Submit</button>
+                    <button type="button" class="btn btn-outline-secondary w-50" @click="closeModal">❌ Cancel</button>
+                </div>
             </form>
+
         </div>
     </div>
 
@@ -826,6 +1031,11 @@ export default {
             <div class="mb-3">
                 <label class="form-label">Email</label>
                 <input v-model="newTherapist.email" type="email" class="form-control" placeholder="Enter email" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input v-model="newTherapist.password" type="password" class="form-control" placeholder="Enter password" required />
             </div>
 
             <div class="mb-3">
@@ -952,7 +1162,83 @@ export default {
         </div>
     </div>
 
+    <!-- Change Password Modal -->
+    <div v-if="showChangePasswordModal" class="modal-overlay" @click.self="showChangePasswordModal = false">
+        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%;">
+            <h3 class="text-center text-primary fw-bold mb-4">🔒 Change Password</h3>
+            <form @submit.prevent="submitPasswordChange">
+            <div class="mb-3">
+                <label>New Password</label>
+                <input type="password" v-model="newPassword" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label>Confirm Password</label>
+                <input type="password" v-model="confirmPassword" class="form-control" required />
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary w-50 me-2">Update</button>
+                <button type="button" class="btn btn-secondary w-50" @click="showChangePasswordModal = false">Cancel</button>
+            </div>
+            </form>
+        </div>
+    </div>
 
+    <!-- Change Availability Modal -->
+    <div v-if="showChangeAvailabilityModal" class="modal-overlay" @click.self="showChangeAvailabilityModal = false">
+        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 500px; max-width: 95%;">
+            <h3 class="text-center text-success fw-bold mb-4">🗓️ Change Availability</h3>
+            <div v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" :key="day" class="mb-3">
+            <strong>{{ day }}</strong>
+            <div class="d-flex gap-2 mt-1">
+                <input 
+                    type="time" 
+                    class="form-control" 
+                    :value="user.availability[day]?.[0]?.start || ''"
+                    @input="updateUserAvailability(day, 'start', $event.target.value)"
+                />
+                <input 
+                    type="time" 
+                    class="form-control" 
+                    :value="user.availability[day]?.[0]?.end || ''"
+                    @input="updateUserAvailability(day, 'end', $event.target.value)"
+                />
+                <button class="btn btn-outline-danger" @click="clearUserAvailability(day)">❌</button>
+            </div>
+            </div>
+            <div class="d-flex justify-content-between">
+            <button class="btn btn-primary w-50 me-2" @click="submitAvailabilityChange">Save</button>
+            <button class="btn btn-secondary w-50" @click="showChangeAvailabilityModal = false">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Out-Of-Office Modal-->
+    <div v-if="showOutOfOfficeModal" class="modal-overlay" @click.self="showOutOfOfficeModal = false">
+        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%;">
+            <h3 class="text-center fw-bold text-danger mb-4">Set Out-of-Office</h3>
+            <div class="mb-3">
+                <label>Start Date</label>
+                <input type="date" class="form-control" v-model="user.outOfOffice.start" />
+            </div>
+            <div class="mb-3">
+                <label>Return Date</label>
+                <input type="date" class="form-control" v-model="user.outOfOffice.end" />
+            </div>
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-primary w-50 me-2" @click="submitOutOfOffice">Save</button>
+                <button class="btn btn-secondary w-50" @click="showOutOfOfficeModal = false">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="outOfOfficeTherapists.length" class="alert alert-warning mt-3">
+        <strong>🚫 Unavailable Therapists:</strong>
+        <ul class="mb-0">
+            <li v-for="t in outOfOfficeTherapists" :key="t.id">
+            {{ t.name }} (returns on {{ getReturnDate(t.outOfOffice.end) }})
+            </li>
+        </ul>
+     </div>
 
     <!-- FullCalendar component -->
     <FullCalendar 

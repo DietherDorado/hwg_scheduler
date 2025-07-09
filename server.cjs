@@ -6,6 +6,10 @@ const PORT = 3000;
 const jwt = require('jsonwebtoken');
 const secretKey = process.env.JWT_SECRET || 'supersecretkey';
 
+const fs = require('fs');
+const path = require('path');
+const DATA_PATH = path.join(__dirname, 'therapists.json');
+
 app.use(cors());
 app.use(express.json());
 
@@ -46,6 +50,10 @@ const therapistData = [
       Wednesday: [{ start: '10:00', end: '18:00' }],
       Thursday: [{ start: '10:00', end: '18:00' }],
       Friday: [{ start: '10:00', end: '18:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
 
@@ -60,6 +68,10 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '13:00', end: '19:00' }],
       Friday: [],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
 
@@ -76,6 +88,10 @@ const therapistData = [
       Friday: [{ start: '10:00', end: '19:00' }],
       Saturday: [{ start: '10:00', end: '17:00' }],
       Sunday: [],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
 
@@ -90,6 +106,10 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '09:00', end: '17:00' }],
       Friday: [{ start: '09:00', end: '17:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
   {
@@ -103,6 +123,10 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '09:00', end: '17:00' }],
       Friday: [{ start: '09:00', end: '17:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
   {
@@ -116,6 +140,10 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '09:00', end: '17:00' }],
       Friday: [{ start: '09:00', end: '17:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
   {
@@ -129,6 +157,10 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '09:00', end: '17:00' }],
       Friday: [{ start: '09:00', end: '17:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
   {
@@ -142,6 +174,10 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '09:00', end: '17:00' }],
       Friday: [{ start: '09:00', end: '17:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
   {
@@ -155,6 +191,10 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '09:00', end: '17:00' }],
       Friday: [{ start: '09:00', end: '17:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
   {
@@ -168,6 +208,10 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '09:00', end: '17:00' }],
       Friday: [{ start: '09:00', end: '17:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
   {
@@ -181,6 +225,10 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '09:00', end: '17:00' }],
       Friday: [{ start: '09:00', end: '17:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
   {
@@ -194,6 +242,10 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '09:00', end: '17:00' }],
       Friday: [{ start: '09:00', end: '17:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
   {
@@ -207,6 +259,10 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '09:00', end: '17:00' }],
       Friday: [{ start: '09:00', end: '17:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   },
   {
@@ -220,14 +276,25 @@ const therapistData = [
       Wednesday: [],
       Thursday: [{ start: '09:00', end: '17:00' }],
       Friday: [{ start: '09:00', end: '17:00' }],
+    },
+    outOfOffice: {
+      start: null, // '2025-07-12'
+      end: null, // '2025-07-15'
     }
   }
 ];
 
-const therapists = therapistData.map(t => ({
-  ...t,
-  password: bcrypt.hashSync(t.password, saltRounds) // Hash passwords
-}))
+let therapists = [];
+
+if (fs.existsSync(DATA_PATH)) {
+  therapists = JSON.parse(fs.readFileSync(DATA_PATH, 'utf-8'));
+} else {
+  therapists = therapistData.map(t => ({
+    ...t,
+    password: bcrypt.hashSync(t.password, saltRounds)
+  }));
+  fs.writeFileSync(DATA_PATH, JSON.stringify(therapists, null, 2));
+}
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -240,6 +307,11 @@ function authenticateToken(req, res, next) {
     next();
   });
 }
+
+function saveTherapists() {
+  fs.writeFileSync(DATA_PATH, JSON.stringify(therapists, null, 2));
+}
+
 
 // Routes
 app.get('/events', authenticateToken, (req, res) => res.json(events));
@@ -254,7 +326,7 @@ let nextEventId = 1;
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  const user = therapists.find(t => t.email === email);
+  const user = therapists.find(t => t.email.toLowerCase() === email.toLowerCase());
   if (!user) {
     return res.status(401).json({ message: 'Invalid email or password' });
   }
@@ -273,10 +345,14 @@ app.post('/login', async (req, res) => {
   res.json({
     message: 'Login successful',
     token,
-    user: { id: user.id, name: user.name, role: user.role }
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,  // include if needed
+      role: user.role
+    }
   });
 });
-
 
 // Handle POST request to add a new event
 app.post('/events', (req, res) => {
@@ -320,8 +396,24 @@ app.delete('/events/:id', (req, res) => {
   res.json({ message: 'Event deleted' })
 })
 
+// Handle PATCH to update OOO
+app.patch('/therapists/:id/out-of-office', (req, res) => {
+  const therapistId = parseInt(req.params.id);
+  const { start, end } = req.body;
+
+  const therapist = therapists.find(t => t.id === therapistId);
+  if (!therapist) {
+    return res.status(404).json({ message: 'Therapist not found' });
+  }
+
+  therapist.outOfOffice = { start, end };
+  saveTherapists(); // 💾 Persist changes
+
+  res.json({ message: 'Out-of-office updated', outOfOffice: therapist.outOfOffice });
+});
+
 // Handle PATCH to request to edit a therapist
-app.patch('/therapists/:id', (req, res) => {
+app.patch('/therapists/:id', async (req, res) => {
   const therapistId = parseInt(req.params.id);
   const updatedData = req.body;
 
@@ -330,7 +422,12 @@ app.patch('/therapists/:id', (req, res) => {
     return res.status(404).json({ error: 'Therapist not found' });
   }
 
-  // Merge the new data into the existing therapist object
+  // If a new password is being set, hash it
+  if (updatedData.password) {
+    const saltRounds = 10;
+    updatedData.password = await bcrypt.hash(updatedData.password, saltRounds);
+  }
+
   therapists[index] = {
     ...therapists[index],
     ...updatedData

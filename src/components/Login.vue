@@ -37,8 +37,8 @@
             </div>
 
             <!-- Login Button -->
-            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2">
-            🚪 Login
+            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2" :disabled="isLoggingIn">
+              🚪 Login
             </button>
         </form>
   
@@ -62,28 +62,38 @@
   const error = ref('')
   const router = useRouter()
   const users = ref([])
+
+  const isLoggingIn = ref(false)
   
   const login = async () => {
-    error.value = ''
+    if (isLoggingIn.value) return // Prevent multiple submissions
+    isLoggingIn.value = true
+    error.value = '' // Reset error message
+
+    const trimmedEmail = email.value.trim().toLowerCase()
+    const trimmedPassword = password.value.trim()
+    
     try {
       const res = await fetch('http://localhost:3000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.value, password: password.value })
+        body: JSON.stringify({ email: trimmedEmail, password: trimmedPassword })
       })
 
+      const data = await res.json()
+
       if (!res.ok) {
-        const { message } = await res.json()
-        throw new Error(message || 'Login failed')
+        throw new Error(data.message || 'Login failed')
       }
 
-      const { user, token } = await res.json()
-      localStorage.setItem('user', JSON.stringify(user))
-      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(data.user))
+      localStorage.setItem('token', data.token)
       router.push('/calendar')
     } catch (err) {
       console.error(err)
       error.value = err.message || 'Something went wrong. Please try again.'
+    } finally {
+      isLoggingIn.value = false
     }
   }
   </script>
