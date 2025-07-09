@@ -143,7 +143,7 @@ export default {
         this.user = storedUser;
         this.isAdmin = this.user.role === 'admin';
 
-        authFetch('http://localhost:3000/events')
+        authFetch('https://hwg-backend.onrender.com/events')
             .then(res => res.json())
             .then(data => {
                 this.allEvents = data.map(event => ({
@@ -156,7 +156,7 @@ export default {
                 console.error('Failed to load events:', err)
             })
 
-        authFetch('http://localhost:3000/therapists')
+        authFetch('https://hwg-backend.onrender.com/therapists')
             .then(res => res.json())
             .then(data => {
                 this.therapists = data.sort((a, b) => a.name.localeCompare(b.name));
@@ -326,7 +326,7 @@ export default {
 
             // Submit each event to backend
             Promise.all(events.map(event =>
-                authFetch('http://localhost:3000/events', {
+                authFetch('https://hwg-backend.onrender.com/events', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -336,7 +336,7 @@ export default {
                     .then(res => res.json())
             ))
                 .then(() => {
-                    return authFetch('http://localhost:3000/events')
+                    return authFetch('https://hwg-backend.onrender.com/events')
                         .then(res => res.json())
                         .then(data => {
                             this.allEvents = data.map(event => ({
@@ -491,7 +491,7 @@ export default {
             const newTitle = `${emoji} ${originalTitle}`;
             this.selectedEvent.setProp('title', newTitle);
 
-            authFetch(`http://localhost:3000/events/${this.selectedEvent.id}`, {
+            authFetch(`https://hwg-backend.onrender.com/events/${this.selectedEvent.id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -518,7 +518,7 @@ export default {
 
             this.selectedEvent.setProp('title', cleanTitle);
 
-            authFetch(`http://localhost:3000/events/${this.selectedEvent.id}`, {
+            authFetch(`https://hwg-backend.onrender.com/events/${this.selectedEvent.id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -548,7 +548,7 @@ export default {
             this.showEventModal = false;
 
             // Continue with API request in background
-            authFetch(`http://localhost:3000/events/${eventToDelete.id}`, {
+            authFetch(`https://hwg-backend.onrender.com/events/${eventToDelete.id}`, {
                 method: 'DELETE'
             }).catch(err => {
                 console.error('Failed to delete event:', err);
@@ -557,7 +557,7 @@ export default {
             });
         },
         submitNewTherapist() {
-            authFetch(`http://localhost:3000/therapists`, {
+            authFetch(`https://hwg-backend.onrender.com/therapists`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -568,7 +568,7 @@ export default {
                 .then(() => {
                     this.showAddTherapistModal = false;
                     alert('New therapist added successfully!');
-                return authFetch('http://localhost:3000/therapists');
+                return authFetch('https://hwg-backend.onrender.com/therapists');
             })
             .then(res => res.json())
             .then(data => {
@@ -614,7 +614,7 @@ export default {
             this.showTherapistDropdown = false;
         },
         saveEditedTherapist() {
-            authFetch(`http://localhost:3000/therapists/${this.selectedTherapistForEdit.id}`, {
+            authFetch(`https://hwg-backend.onrender.com/therapists/${this.selectedTherapistForEdit.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(this.selectedTherapistForEdit)
@@ -622,7 +622,7 @@ export default {
                 .then(() => {
                     alert('Therapist updated successfully!');
                     this.showEditTherapistModal = false;
-                    return authFetch('http://localhost:3000/therapists');
+                    return authFetch('https://hwg-backend.onrender.com/therapists');
                 })
                 .then(res => res.json())
                 .then(data => {
@@ -635,13 +635,13 @@ export default {
             const confirmDelete = confirm("Are you sure you want to delete this therapist? This action cannot be undone.");
             if (!confirmDelete) return;
 
-            authFetch(`http://localhost:3000/therapists/${id}`, {
+            authFetch(`https://hwg-backend.onrender.com/therapists/${id}`, {
                 method: 'DELETE'
             })
             .then(() => {
                 alert('Therapist deleted successfully!');
                 this.showDeleteTherapistModal = false;
-                return authFetch('http://localhost:3000/therapists');
+                return authFetch('https://hwg-backend.onrender.com/therapists');
             })
             .then(res => res.json())
             .then(data => {
@@ -708,7 +708,7 @@ export default {
             }
 
             try {
-                const res = await authFetch(`http://localhost:3000/therapists/${this.user.id}`, {
+                const res = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}`, {
                 method: 'PATCH',
                 body: JSON.stringify({ password: this.newPassword })
                 });
@@ -724,7 +724,7 @@ export default {
         },
         async submitAvailabilityChange() {
             try {
-                const res = await authFetch(`http://localhost:3000/therapists/${this.user.id}`, {
+                const res = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}`, {
                 method: 'PATCH',
                 body: JSON.stringify({ availability: this.user.availability })
                 });
@@ -745,7 +745,7 @@ export default {
         },
         async submitOutOfOffice() {
             try {
-                const res = await authFetch(`http://localhost:3000/therapists/${this.user.id}/out-of-office`, {
+                const res = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}/out-of-office`, {
                     method: 'PATCH',
                     body: JSON.stringify({
                         start: this.user.outOfOffice.start,
@@ -761,7 +761,7 @@ export default {
                     this.therapistMap[this.user.name].outOfOffice = data.outOfOffice;
                 }
 
-                await authFetch('http://localhost:3000/therapists')
+                await authFetch('https://hwg-backend.onrender.com/therapists')
                     .then(res => res.json())
                     .then(data => {
                         this.therapists = data.sort((a, b) => a.name.localeCompare(b.name));
