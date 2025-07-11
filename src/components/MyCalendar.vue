@@ -804,12 +804,7 @@ export default {
             const endDate = new Date(startDate.getTime() + duration * 60000);
 
             const pad = (n) => n.toString().padStart(2, '0');
-            const formatted = `${endDate.getFullYear()}-
-                               ${pad(endDate.getMonth() + 1)}-
-                               ${pad(endDate.getDate())}T
-                               ${pad(endDate.getHours())}:
-                               ${pad(endDate.getMinutes())}`;
-                               
+            const formatted = `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())}T${pad(endDate.getHours())}:${pad(endDate.getMinutes())}`;
             this.form.end = formatted;
         }
     },
