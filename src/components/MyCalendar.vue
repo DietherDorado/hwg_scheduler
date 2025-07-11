@@ -6,6 +6,7 @@ import listPlugin from '@fullcalendar/list'
 import BootstrapTheme from '@fullcalendar/bootstrap5'
 import { useRouter } from 'vue-router'
 import { formatDate } from '@fullcalendar/core/index.js'
+import { reactive, watch } from 'vue'
 
 const authFetch = async (urlencoded, options = {}) => {
     const token = localStorage.getItem('token')
@@ -794,6 +795,16 @@ export default {
             const date = new Date(end);
             date.setDate(date.getDate() + 1);
             return date.toISOString().split('T')[0];
+        },
+        updateEndTime(start, service) {
+            if (!start) return;
+
+            const startDate = new Date(start);
+            const duration = service === 'KAP Dosing' ? 180 : 50;
+            const endDate = new Date(startDate.getTime() + duration * 60000);
+
+            const formatted = endDate.toISOString().slice(0, 16);
+            this.form.end = formatted;
         }
     },
     computed: {
@@ -819,6 +830,14 @@ export default {
         selectedTherapist() {
             const calendarApi = this.$refs.fullCalendar?.getApi?.();
             calendarApi.refetchEvents();
+        },
+
+        'form.start': function (newStart) {
+            this.updateEndTime(newStart, this.form.service);
+        },
+
+        'form.service': function (newService) {
+            this.updateEndTime(this.form.start, newService);
         }
     },
 }
@@ -949,7 +968,7 @@ export default {
                     </div>
                     <div class="col-md-6">
                     <label class="form-label">End Time</label>
-                    <input v-model="form.end" type="datetime-local" class="form-control" required />
+                    <input v-model="form.end" type="datetime-local" class="form-control" readonly />
                     </div>
                 </div>
 
