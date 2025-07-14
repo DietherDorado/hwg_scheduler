@@ -331,7 +331,7 @@ export default {
                         title: event.title,
                         timestart: event.start,
                         timeend: event.end,
-                        therapist: event.extendedProps.therapist,
+                        therapist_id: this.therapistMap[event.extendedProps.therapist]?.id,
                         client: event.extendedProps.client,
                         service: event.extendedProps.service,
                         room: event.extendedProps.room,
