@@ -150,7 +150,15 @@ export default {
                 this.allEvents = data.map(event => ({
                     ...event,
                     start: new Date(event.timestart),
-                    end: new Date(event.timeend)
+                    end: new Date(event.timeend),
+                    extendedProps: {
+                        therapist: this.therapists.find(t => t.id === event.therapist_id)?.name || '',
+                        client: event.client,
+                        service: event.service,
+                        room: event.room,
+                        description: event.description,
+                        frequency: event.frequency
+                    }
                 }))
             })
             .catch(err => {
