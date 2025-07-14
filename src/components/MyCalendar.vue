@@ -286,9 +286,9 @@ export default {
             const repeatCount = frequency === 'none' ? 1 : 5; // Default to 5 occurrences if repeating
 
             const intervalMs = {
-                daily: 24 * 60 * 60 * 1000, // 1 day
-                weekly: 7 * 24 * 60 * 60 * 1000, // 1 week
-                monthly: 30 * 24 * 60 * 60 * 1000 // Roughly 1 month
+                daily: 86400000,
+                weekly: 604800000,
+                monthly: 2592000000
             };
 
             const events = [];
@@ -306,50 +306,58 @@ export default {
                     currentEnd = new Date(currentEnd.getTime() + offset);
                 }
 
-                const event = {
-                    title: this.form.title,
-                    start: currentStart.toISOString(),
-                    end: currentEnd.toISOString(),
-                    backgroundColor: roomColor,
-                    extendedProps: {
-                        therapist: this.form.therapist,
-                        client: this.form.client,
-                        description: this.form.description,
-                        room: this.form.room,
-                        service: this.form.service,
-                        frequency: this.form.frequency
-                    }
-                };
-
-                events.push(event);
-            }
+                events.push({
+                title: this.form.title,
+                start: currentStart.toISOString(),
+                end: currentEnd.toISOString(),
+                backgroundColor: roomColor,
+                extendedProps: {
+                    therapist: this.form.therapist,
+                    client: this.form.client,
+                    description: this.form.description,
+                    room: this.form.room,
+                    service: this.form.service,
+                    frequency: this.form.frequency
+                }   
+            });
+        }
 
 
             // Submit each event to backend
             Promise.all(events.map(event =>
                 authFetch('https://hwg-backend.onrender.com/events', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(event)
-                })
-                    .then(res => res.json())
+                    body: JSON.stringify({
+                        title: event.title,
+                        start: event.start,
+                        end: event.end,
+                        therapist: event.extendedProps.therapist,
+                        client: event.extendedProps.client,
+                        service: event.extendedProps.service,
+                        room: event.extendedProps.room,
+                        description: event.extendedProps.description,
+                        frequency: event.extendedProps.frequency || 'none',
+                        backgroundColor: event.backgroundColor
+                    })
+                }).then(res => res.json())
             ))
-                .then(() => {
-                    return authFetch('https://hwg-backend.onrender.com/events')
-                        .then(res => res.json())
-                        .then(data => {
-                            this.allEvents = data.map(event => ({
-                                ...event,
-                                start: new Date(event.start),
-                                end: new Date(event.end)
-                            }))
-                            const calendarApi = this.$refs.fullCalendar?.getApi?.();
-                            calendarApi?.refetchEvents();
-                        })
-                })
-                .then(() => this.closeModal())
+            .then(() => {
+                return authFetch('https://hwg-backend.onrender.com/events')
+                    .then(res => res.json())
+                    .then(data => {
+                        this.allEvents = data.map(event => ({
+                            ...event,
+                            start: new Date(event.start),
+                            end: new Date(event.end)
+                        }))
+                        this.$refs.fullCalendar?.getApi?.().refetchEvents();
+                    })
+            })
+            .then(() => this.closeModal())
+                .catch(err => {
+                    console.error('Error submitting event:', err);
+                    alert('Failed to schedule session. Please try again.');
+            })
         },
         renderEventContent(arg) {
             const event = arg.event;
