@@ -356,7 +356,11 @@ export default {
                         this.allEvents = data.map(event => ({
                             ...event,
                             start: new Date(event.timestart),
-                            end: new Date(event.timeend)
+                            end: new Date(event.timeend),
+                            extendedProps: {
+                                ...event,
+                                therapist: event.therapist_name
+                            }
                         }))
                         this.$refs.fullCalendar?.getApi?.().refetchEvents();
                     })
@@ -826,11 +830,13 @@ export default {
     },
     computed: {
         filteredEvents() {
+            if (!this.allEvents || !this.therapistMap) return [];
+
             if (this.selectedTherapist === 'All') {
                 return this.allEvents || [];
             }
-            return (this.allEvents || []).filter(
-                event => event.extendedProps?.therapist === this.selectedTherapist
+            return this.allEvents.filter(
+                e => e.extendedProps?.therapist === this.selectedTherapist
             );
         },
         outOfOfficeTherapists() {
