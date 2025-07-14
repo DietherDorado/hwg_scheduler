@@ -329,8 +329,8 @@ export default {
                     method: 'POST',
                     body: JSON.stringify({
                         title: event.title,
-                        start: event.start,
-                        end: event.end,
+                        timestart: event.start,
+                        timeend: event.end,
                         therapist: event.extendedProps.therapist,
                         client: event.extendedProps.client,
                         service: event.extendedProps.service,
