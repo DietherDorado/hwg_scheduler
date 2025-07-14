@@ -347,8 +347,8 @@ export default {
                     .then(data => {
                         this.allEvents = data.map(event => ({
                             ...event,
-                            start: new Date(event.start),
-                            end: new Date(event.end)
+                            start: new Date(event.timestart),
+                            end: new Date(event.timeend)
                         }))
                         this.$refs.fullCalendar?.getApi?.().refetchEvents();
                     })
