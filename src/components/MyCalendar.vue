@@ -152,7 +152,7 @@ export default {
                     start: new Date(event.timestart),
                     end: new Date(event.timeend),
                     extendedProps: {
-                        therapist: this.therapists.find(t => t.id === event.therapist_id)?.name || '',
+                        therapist: event.therapist_name,
                         client: event.client,
                         service: event.service,
                         room: event.room,
