@@ -137,63 +137,13 @@ export default {
             return;
         }
 
-        if (!storedUser.outOfOffice) {
-            storedUser.outOfOffice = { start: '', end: '' };
-        }
-
         this.user = storedUser;
         this.isAdmin = this.user.role === 'admin';
+        if (!this.user.outOfOffice) {
+            this.user.outOfOffice = { start: '', end: '' };
+        }
 
-        authFetch('https://hwg-backend.onrender.com/events')
-            .then(res => res.json())
-            .then(data => {
-                this.allEvents = data.map(event => ({
-                    ...event,
-                    start: new Date(event.timestart),
-                    end: new Date(event.timeend),
-                    extendedProps: {
-                        therapist: event.therapist_name,
-                        client: event.client,
-                        service: event.service,
-                        room: event.room,
-                        description: event.description,
-                        frequency: event.frequency
-                    }
-                }))
-            })
-            .catch(err => {
-                console.error('Failed to load events:', err)
-            })
-
-        authFetch('https://hwg-backend.onrender.com/therapists')
-            .then(res => res.json())
-            .then(data => {
-                this.therapists = data.sort((a, b) => a.name.localeCompare(b.name));
-                this.therapistMap = {}
-                data.forEach(t => {
-                    this.therapistMap[t.name] = t
-                })
-
-                this.calendarOptions.eventSources = [
-                    {
-                        events: this.getUnavailableBackgrounds,
-                        color: '#a0a0a0', // light gray for unavailable times
-                        textColor: 'transparent',
-                        display: 'background',
-                        editable: false,
-                        overlap: false,
-                        groupId: 'unavailable'
-                    },
-                    {
-                        events: (fetchInfo, successCallback) => {
-                            successCallback(this.filteredEvents)
-                        }
-                    }
-                ]
-
-                const calendarApi = this.$refs.fullCalendar?.getApi?.();
-                if (calendarApi) calendarApi.refetchEvents();
-            })
+        this.loadData();
 
         this.calendarOptions.select = this.handleSlotSelect;
         this.calendarOptions.selectAllow = this.selectAllow;
@@ -795,6 +745,56 @@ export default {
             } catch (err) {
                 console.error('Error updating out-of-office', err);
                 alert('Failed to update.');
+            }
+        },
+        async loadData() {
+            try {
+                // Get Therapist First
+                const therapistRes = await authFetch('https://hwg-backend.onrender.com/therapists');
+                const therapistData = await therapistRes.json();
+
+                this.therapists = therapistData.sort((a, b) => a.name.localeCompare(b.name));
+                this.therapistMap = {};
+                therapistData.forEach(t => {
+                    this.therapistMap[t.name] = t;
+                });
+
+                // Load Events
+                const eventRes = await authFetch('https://hwg-backend.onrender.com/events');
+                const eventData = await eventRes.json();
+
+                this.allEvents = eventData.map(event => ({
+                    ...event,
+                    start: new Date(event.timestart),
+                    end: new Date(event.timeend),
+                    extendedProps: {
+                        ...event,
+                        therapist: event.therapist_name
+                    }
+                }));
+
+                // Update Calendar's eventSources
+                this.calendarOptions.eventSources = [
+                    {
+                        events: this.getUnavailableBackgrounds,
+                        color: '#a0a0a0',
+                        textColor: 'transparent',
+                        display: 'background',
+                        editable: false,
+                        overlap: false,
+                        groupId: 'unavailable'
+                    },
+                    {
+                        events: (fetchInfo, successCallback) => {
+                            successCallback(this.filteredEvents);
+                        }
+                    }
+                ];
+
+                this.$refs.fullCalendar?.getApi?.().refetchEvents();
+            } catch (err) {
+                console.error('Error loading data:', err);
+                alert('Failed to load calendar data.');
             }
         },
         clearUserAvailability(day) {
