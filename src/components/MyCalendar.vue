@@ -695,7 +695,7 @@ export default {
         },
         async submitAvailabilityChange() {
             try {
-                const res = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}`, {
+                const res = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}/availability`, {
                 method: 'PATCH',
                 body: JSON.stringify({ availability: this.user.availability })
                 });
