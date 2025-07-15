@@ -680,8 +680,8 @@ export default {
 
             try {
                 const res = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}`, {
-                method: 'PATCH',
-                body: JSON.stringify({ password: this.newPassword })
+                    method: 'PATCH',
+                    body: JSON.stringify({ newPassword: this.newPassword })
                 });
                 if (!res.ok) throw new Error('Failed to update password');
                 alert('Password updated successfully!');
