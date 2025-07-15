@@ -679,7 +679,7 @@ export default {
             }
 
             try {
-                const res = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}`, {
+                const res = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}/password`, {
                     method: 'PATCH',
                     body: JSON.stringify({ newPassword: this.newPassword })
                 });
