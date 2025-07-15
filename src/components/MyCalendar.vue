@@ -295,7 +295,8 @@ export default {
                         room: event.extendedProps.room,
                         description: event.extendedProps.description,
                         frequency: event.extendedProps.frequency || 'none',
-                        backgroundColor: event.backgroundColor
+                        backgroundColor: event.backgroundColor,
+                        textColor: '#ffffff'
                     })
                 }).then(res => res.json())
             ))
