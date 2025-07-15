@@ -767,6 +767,7 @@ export default {
                     ...event,
                     start: new Date(event.timestart),
                     end: new Date(event.timeend),
+                    backgroundColor: event.backgroundcolor,
                     extendedProps: {
                         ...event,
                         therapist: event.therapist_name
