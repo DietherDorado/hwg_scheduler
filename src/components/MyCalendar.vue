@@ -169,7 +169,7 @@ export default {
             }
         }
 
-        this.user = storedUser;
+        // this.user = storedUser;
     },
     beforeUnmount() {
         document.removeEventListener('click', this.handleClickOutsideDropdown);
