@@ -299,12 +299,12 @@ export default {
                         title: event.title,
                         timestart: event.start,
                         timeend: event.end,
-                        therapist: event.extendedProps.therapist,
-                        client: event.extendedProps.client,
-                        service: event.extendedProps.service,
-                        room: event.extendedProps.room,
-                        description: event.extendedProps.description,
-                        frequency: event.extendedProps.frequency || 'none',
+                        therapist: event.therapist,
+                        client: event.client,
+                        service: event.service,
+                        room: event.room,
+                        description: event.description,
+                        frequency: event.frequency || 'none',
                         backgroundColor: event.backgroundColor,
                         textColor: '#ffffff'
                     })
