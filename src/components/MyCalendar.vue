@@ -717,34 +717,25 @@ export default {
         async submitOutOfOffice() {
             try {
                 const res = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}/out-of-office`, {
-                    method: 'PATCH',
-                    body: JSON.stringify({
-                        start: this.user.outOfOffice.start,
-                        end: this.user.outOfOffice.end
-                    })
+                method: 'PATCH',
+                body: JSON.stringify({
+                    start: this.user.outOfOffice.start,
+                    end: this.user.outOfOffice.end
                 })
+                });
 
-                const data = await res.json();
-                this.user.outOfOffice = data.outOfOffice;
-                localStorage.setItem('user', JSON.stringify(this.user));
+                if (!res.ok) throw new Error('Failed to update out-of-office');
 
-                if (this.therapistMap[this.user.name]) {
-                    this.therapistMap[this.user.name].outOfOffice = data.outOfOffice;
-                }
+                // 🔁 Get fresh user data from the backend
+                const updatedUser = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}`);
+                const updatedUserData = await updatedUser.json();
 
-                const therapistRes = await authFetch('https://hwg-backend.onrender.com/therapists');
-                const therapistData = await therapistRes.json();
-                this.therapists = therapistData.sort((a, b) => a.name.localeCompare(b.name));
-                this.therapistMap = {};
-                therapistData.forEach(t => { this.therapistMap[t.name] = t });
-
-                const matchingTherapist = this.therapistMap[this.user.name];
-                if (matchingTherapist && matchingTherapist.outOfOffice) {
-                    this.user.outOfOffice = matchingTherapist.outOfOffice;
-                }
+                this.user = updatedUserData; // ✅ force Vue to update reactivity
+                localStorage.setItem('user', JSON.stringify(updatedUserData));
 
                 this.showOutOfOfficeModal = false;
                 alert('Out-of-office updated.');
+
             } catch (err) {
                 console.error('Error updating out-of-office', err);
                 alert('Failed to update.');
