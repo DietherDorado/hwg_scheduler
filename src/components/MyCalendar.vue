@@ -836,8 +836,13 @@ export default {
         outOfOfficeTherapists() {
             const today = new Date();
             return (this.therapists || []).filter(t => {
-                const startStr = t?.outOfOffice?.start;
-                const endStr = t?.outOfOffice?.end;
+                if (!t || typeof t !== 'object') return false;
+
+                const ooo = t.outOfOffice;
+                if (!ooo || typeof ooo !== 'object') return false;
+
+                const startStr = ooo.start;
+                const endStr = ooo.end;
 
                 if (!startStr || !endStr) return false;
 
