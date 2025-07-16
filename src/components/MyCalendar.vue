@@ -894,9 +894,14 @@ export default {
         </div>
     </div>
 
-    <div v-if="user.outOfOffice && user.outOfOffice.start">
+    <div v-if="user?.outOfOffice?.start || JSON.parse(localStorage.getItem('user'))?.outOfOffice?.start">
         <strong>Out of Office:</strong><br>
-        {{ formatDate(user.outOfOffice.start) }} - {{ formatDate(user.outOfOffice.end) }}
+        {{
+            formatDate(user?.outOfOffice?.start || JSON.parse(localStorage.getItem('user'))?.outOfOffice?.start)
+        }} - 
+        {{
+            formatDate(user?.outOfOffice?.end || JSON.parse(localStorage.getItem('user'))?.outOfOffice?.end)
+        }}
     </div>
 
 
