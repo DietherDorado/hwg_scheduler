@@ -726,16 +726,23 @@ export default {
 
                 if (!res.ok) throw new Error('Failed to update out-of-office');
 
-                // 🔁 Get fresh user data from the backend
-                const updatedUser = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}`);
-                const updatedUserData = await updatedUser.json();
+                // ✅ Re-fetch the full therapist list
+                const updatedList = await authFetch(`https://hwg-backend.onrender.com/therapists`);
+                const therapists = await updatedList.json();
 
-                this.user = updatedUserData; // ✅ force Vue to update reactivity
-                localStorage.setItem('user', JSON.stringify(updatedUserData));
+                this.therapists = therapists.sort((a, b) => a.name.localeCompare(b.name));
+                this.therapistMap = {};
+                therapists.forEach(t => { this.therapistMap[t.name] = t });
+
+                // ✅ Update just this.user from that list
+                const currentUser = therapists.find(t => t.id === this.user.id);
+                if (currentUser) {
+                this.user = currentUser;
+                localStorage.setItem('user', JSON.stringify(currentUser));
+                }
 
                 this.showOutOfOfficeModal = false;
                 alert('Out-of-office updated.');
-
             } catch (err) {
                 console.error('Error updating out-of-office', err);
                 alert('Failed to update.');
