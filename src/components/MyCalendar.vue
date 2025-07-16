@@ -18,17 +18,6 @@ const authFetch = async (urlencoded, options = {}) => {
     return fetch(urlencoded, { ...options, headers })
 }
 
-const roomColors = {
-  "Kana’s Room": "#8c52ff",
-  "Blue Room": "#386bff",
-  "Family Room": "#ff66c4",
-  "Neuro Room": "#ffde59",
-  "Room 1": "#7ed597",
-  "Room 2": "#ffbd59",
-  "Room 3": "#004aad",
-  "Telehealth": "#708b4e"
-};
-
 export default {
     components: {
         FullCalendar
@@ -246,7 +235,7 @@ export default {
             calendarApi?.unselect(); // Clear any previous selection
         },
         submitEvent() {
-            const roomColor = roomColors[this.form.room] || '#000000' // Default color if room not found
+            const roomColor = this.rooms[this.form.room] || '#000000' // Default color if room not found
             const { frequency } = this.form;
 
             const startDate = new Date(this.form.start);
@@ -276,19 +265,20 @@ export default {
                 }
 
                 events.push({
-                    title: this.form.title,
-                    start: currentStart.toISOString(),
-                    end: currentEnd.toISOString(),
-                    backgroundColor: roomColor,
-                    textColor: '#ffffff', // Optional, good for dark backgrounds
+                title: this.form.title,
+                start: currentStart.toISOString(),
+                end: currentEnd.toISOString(),
+                backgroundColor: roomColor,
+                extendedProps: {
                     therapist: this.form.therapist,
                     client: this.form.client,
                     description: this.form.description,
                     room: this.form.room,
                     service: this.form.service,
                     frequency: this.form.frequency
-                });
-            }
+                }   
+            });
+        }
 
 
             // Submit each event to backend
