@@ -168,8 +168,6 @@ export default {
                 Sunday: []
             }
         }
-
-        this.user = storedUser;
     },
     beforeUnmount() {
         document.removeEventListener('click', this.handleClickOutsideDropdown);
