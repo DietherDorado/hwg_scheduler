@@ -732,13 +732,16 @@ export default {
                     this.therapistMap[this.user.name].outOfOffice = data.outOfOffice;
                 }
 
-                await authFetch('https://hwg-backend.onrender.com/therapists')
-                    .then(res => res.json())
-                    .then(data => {
-                        this.therapists = data.sort((a, b) => a.name.localeCompare(b.name));
-                        this.therapistMap = {};
-                        data.forEach(t => { this.therapistMap[t.name] = t });
-                    })
+                const therapistRes = await authFetch('https://hwg-backend.onrender.com/therapists');
+                const therapistData = await therapistRes.json();
+                this.therapists = therapistData.sort((a, b) => a.name.localeCompare(b.name));
+                this.therapistMap = {};
+                therapistData.forEach(t => { this.therapistMap[t.name] = t });
+
+                const matchingTherapist = this.therapistMap[this.user.name];
+                if (matchingTherapist && matchingTherapist.outOfOffice) {
+                    this.user.outOfOffice = matchingTherapist.outOfOffice;
+                }
 
                 this.showOutOfOfficeModal = false;
                 alert('Out-of-office updated.');
