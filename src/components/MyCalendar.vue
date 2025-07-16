@@ -732,7 +732,7 @@ export default {
                 alert('Out-of-office updated.');
 
                 await this.loadData();
-                
+
             } catch (err) {
                 console.error('Error updating out-of-office', err);
                 alert('Failed to update.');
@@ -782,6 +782,10 @@ export default {
                         }
                     }
                 ];
+
+                if (this.user && this.therapistMap[this.user.name]) {
+                    this.user = this.therapistMap[this.user.name];
+                }
 
                 this.$refs.fullCalendar?.getApi?.().refetchEvents();
             } catch (err) {
@@ -834,9 +838,12 @@ export default {
         outOfOfficeTherapists() {
             const today = new Date();
             return this.therapists.filter(t => {
-                const start = new Date(t.outOfOffice?.start);
-                const end = new Date(t.outOfOffice?.end);
-                return start && end && end >= today;
+                if (!t.outOfOffice || !t.outOfOffice.start || !t.outOfOffice.end) return false;
+
+                const start = new Date(t.outOfOffice.start);
+                const end = new Date(t.outOfOffice.end);
+
+                return !isNaN(start) && !isNaN(end) && end >= today;
             });
         }
 
