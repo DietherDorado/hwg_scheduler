@@ -845,7 +845,7 @@ export default {
             return this.therapists.filter(t => {
                 const start = new Date(t.outOfOffice?.start);
                 const end = new Date(t.outOfOffice?.end);
-                return start && end && today >= start && today <= end;
+                return start && end && end >= today;
             });
         }
 
