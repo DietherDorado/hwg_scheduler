@@ -774,6 +774,22 @@ export default {
                     }
                 }));
 
+                // Generate OOO background blocks
+                const oooEvents = this.therapists.flatMap(t => {
+                    if (!t.outOfOffice?.start || !t.outOfOffice?.end) return [];
+
+                    return [{
+                        title: `🚫 ${t.name} (Out of Office)`,
+                        start: new Date(t.outOfOffice.start),
+                        end: new Date(t.outOfOffice.end),
+                        display: 'background',
+                        backgroundColor: '#ffcccc',
+                        classNames: ['ooo-slot'],
+                        editable: false,
+                        overlap: false
+                    }]
+                })
+
                 // Update Calendar's eventSources
                 this.calendarOptions.eventSources = [
                     {
@@ -789,6 +805,9 @@ export default {
                         events: (fetchInfo, successCallback) => {
                             successCallback(this.filteredEvents);
                         }
+                    },
+                    {
+                        events: () => oooEvents
                     }
                 ];
 
