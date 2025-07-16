@@ -802,9 +802,7 @@ export default {
                         groupId: 'unavailable'
                     },
                     {
-                        events: (fetchInfo, successCallback) => {
-                            successCallback(this.filteredEvents);
-                        }
+                        events: () => [...this.filteredEvents]
                     },
                     {
                         events: () => oooEvents
