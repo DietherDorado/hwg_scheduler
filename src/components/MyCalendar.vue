@@ -296,7 +296,6 @@ export default {
                         description: event.description,
                         frequency: event.frequency || 'none',
                         backgroundColor: event.backgroundColor,
-                        textColor: '#ffffff'
                     })
                 }).then(res => res.json())
             ))
