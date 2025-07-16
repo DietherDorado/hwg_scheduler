@@ -289,12 +289,12 @@ export default {
                         title: event.title,
                         timestart: event.start,
                         timeend: event.end,
-                        therapist: event.therapist,
-                        client: event.client,
-                        service: event.service,
-                        room: event.room,
-                        description: event.description,
-                        frequency: event.frequency || 'none',
+                        therapist: event.extendedProps?.therapist, // ✅ fix
+                        client: event.extendedProps?.client,
+                        service: event.extendedProps?.service,
+                        room: event.extendedProps?.room,
+                        description: event.extendedProps?.description,
+                        frequency: event.extendedProps?.frequency,
                         backgroundColor: event.backgroundColor,
                     })
                 }).then(res => res.json())
