@@ -717,28 +717,30 @@ export default {
         async submitOutOfOffice() {
             try {
                 const res = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}/out-of-office`, {
-                method: 'PATCH',
-                body: JSON.stringify({
-                    start: this.user.outOfOffice.start,
-                    end: this.user.outOfOffice.end
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        start: this.user.outOfOffice.start,
+                        end: this.user.outOfOffice.end
+                    })
                 })
-                });
 
-                if (!res.ok) throw new Error('Failed to update out-of-office');
+                const data = await res.json();
+                this.user.outOfOffice = data.outOfOffice;
+                localStorage.setItem('user', JSON.stringify(this.user));
 
-                // ✅ Re-fetch the full therapist list
-                const updatedList = await authFetch(`https://hwg-backend.onrender.com/therapists`);
-                const therapists = await updatedList.json();
+                if (this.therapistMap[this.user.name]) {
+                    this.therapistMap[this.user.name].outOfOffice = data.outOfOffice;
+                }
 
-                this.therapists = therapists.sort((a, b) => a.name.localeCompare(b.name));
+                const therapistRes = await authFetch('https://hwg-backend.onrender.com/therapists');
+                const therapistData = await therapistRes.json();
+                this.therapists = therapistData.sort((a, b) => a.name.localeCompare(b.name));
                 this.therapistMap = {};
-                therapists.forEach(t => { this.therapistMap[t.name] = t });
+                therapistData.forEach(t => { this.therapistMap[t.name] = t });
 
-                // ✅ Update just this.user from that list
-                const currentUser = therapists.find(t => t.id === this.user.id);
-                if (currentUser) {
-                this.user = currentUser;
-                localStorage.setItem('user', JSON.stringify(currentUser));
+                const matchingTherapist = this.therapistMap[this.user.name];
+                if (matchingTherapist && matchingTherapist.outOfOffice) {
+                    this.user.outOfOffice = matchingTherapist.outOfOffice;
                 }
 
                 this.showOutOfOfficeModal = false;
@@ -892,8 +894,8 @@ export default {
         </div>
     </div>
 
-    <div v-if="user && user.outOfOffice && user.outOfOffice.start">
-        <strong>Out of Office:</strong><br />
+    <div v-if="user.outOfOffice && user.outOfOffice.start">
+        <strong>Out of Office:</strong><br>
         {{ formatDate(user.outOfOffice.start) }} - {{ formatDate(user.outOfOffice.end) }}
     </div>
 
