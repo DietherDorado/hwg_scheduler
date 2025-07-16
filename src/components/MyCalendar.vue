@@ -835,16 +835,18 @@ export default {
         },
         outOfOfficeTherapists() {
             const today = new Date();
-            return this.therapists.filter(t => {
-                if (!t.outOfOffice || !t.outOfOffice.start || !t.outOfOffice.end) return false;
+            return (this.therapists || []).filter(t => {
+                const startStr = t?.outOfOffice?.start;
+                const endStr = t?.outOfOffice?.end;
 
-                const start = new Date(t.outOfOffice.start);
-                const end = new Date(t.outOfOffice.end);
+                if (!startStr || !endStr) return false;
+
+                const start = new Date(startStr);
+                const end = new Date(endStr);
 
                 return !isNaN(start) && !isNaN(end) && end >= today;
             });
         }
-
     },
     watch: {
         selectedTherapist() {
