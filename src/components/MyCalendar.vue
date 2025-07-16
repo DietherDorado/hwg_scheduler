@@ -728,20 +728,11 @@ export default {
                 this.user.outOfOffice = data.outOfOffice;
                 localStorage.setItem('user', JSON.stringify(this.user));
 
-                if (this.therapistMap[this.user.name]) {
-                    this.therapistMap[this.user.name].outOfOffice = data.outOfOffice;
-                }
-
-                await authFetch('https://hwg-backend.onrender.com/therapists')
-                    .then(res => res.json())
-                    .then(data => {
-                        this.therapists = data.sort((a, b) => a.name.localeCompare(b.name));
-                        this.therapistMap = {};
-                        data.forEach(t => { this.therapistMap[t.name] = t });
-                    })
-
                 this.showOutOfOfficeModal = false;
                 alert('Out-of-office updated.');
+
+                await this.loadData();
+                
             } catch (err) {
                 console.error('Error updating out-of-office', err);
                 alert('Failed to update.');
