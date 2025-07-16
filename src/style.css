@@ -251,3 +251,9 @@
   margin-top: -2rem;
   margin-bottom: 1rem;
 }
+
+.alert.alert-warning {
+  background-color: #fff3f3;
+  border-left: 5px solid #e63946;
+  color: #900;
+}
