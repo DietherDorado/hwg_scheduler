@@ -168,6 +168,8 @@ export default {
                 Sunday: []
             }
         }
+
+        this.user = storedUser;
     },
     beforeUnmount() {
         document.removeEventListener('click', this.handleClickOutsideDropdown);
@@ -726,11 +728,20 @@ export default {
                 this.user.outOfOffice = data.outOfOffice;
                 localStorage.setItem('user', JSON.stringify(this.user));
 
+                if (this.therapistMap[this.user.name]) {
+                    this.therapistMap[this.user.name].outOfOffice = data.outOfOffice;
+                }
+
+                await authFetch('https://hwg-backend.onrender.com/therapists')
+                    .then(res => res.json())
+                    .then(data => {
+                        this.therapists = data.sort((a, b) => a.name.localeCompare(b.name));
+                        this.therapistMap = {};
+                        data.forEach(t => { this.therapistMap[t.name] = t });
+                    })
+
                 this.showOutOfOfficeModal = false;
                 alert('Out-of-office updated.');
-
-                await this.loadData();
-
             } catch (err) {
                 console.error('Error updating out-of-office', err);
                 alert('Failed to update.');
@@ -780,10 +791,6 @@ export default {
                         }
                     }
                 ];
-
-                if (this.user && this.therapistMap[this.user.name]) {
-                    this.user = this.therapistMap[this.user.name];
-                }
 
                 this.$refs.fullCalendar?.getApi?.().refetchEvents();
             } catch (err) {
@@ -835,23 +842,13 @@ export default {
         },
         outOfOfficeTherapists() {
             const today = new Date();
-            return (this.therapists || []).filter(t => {
-                if (!t || typeof t !== 'object') return false;
-
-                const ooo = t.outOfOffice;
-                if (!ooo || typeof ooo !== 'object') return false;
-
-                const startStr = ooo.start;
-                const endStr = ooo.end;
-
-                if (!startStr || !endStr) return false;
-
-                const start = new Date(startStr);
-                const end = new Date(endStr);
-
-                return !isNaN(start) && !isNaN(end) && end >= today;
+            return this.therapists.filter(t => {
+                const start = new Date(t.outOfOffice?.start);
+                const end = new Date(t.outOfOffice?.end);
+                return start && end && end >= today;
             });
         }
+
     },
     watch: {
         selectedTherapist() {
