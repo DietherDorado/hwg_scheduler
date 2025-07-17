@@ -1031,7 +1031,7 @@ export default {
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">End Time</label>
-                        <input v-model="form.end" type="datetime-local" class="form-control" :readonly="form.service !== 'Out-of-Office'" />
+                        <input v-model="form.end" type="datetime-local" class="form-control" :readonly="form.service !== 'Out-Of-Office'" />
                     </div>
                 </div>
 
