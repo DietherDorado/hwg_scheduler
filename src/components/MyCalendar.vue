@@ -736,7 +736,15 @@ export default {
                 const therapistData = await therapistRes.json();
                 this.therapists = therapistData.sort((a, b) => a.name.localeCompare(b.name));
                 this.therapistMap = {};
-                therapistData.forEach(t => { this.therapistMap[t.name] = t });
+                therapistData.forEach(t => {
+                    const parsedOutofOffice = typeof t.out_of_office === 'string' ? JSON.parse(t.out_of_office) : t.out_of_office;
+                    const therapist = {
+                        ...t,
+                        outOfOffice: parsedOutofOffice
+                    }
+                    this.therapistMap[therapist.name] = therapist;
+                });
+                this.therapists = Object.values(this.therapistMap).sort((a, b) => a.name.localeCompare(b.name))
 
                 const matchingTherapist = this.therapistMap[this.user.name];
                 if (matchingTherapist && matchingTherapist.outOfOffice) {
@@ -846,9 +854,12 @@ export default {
         outOfOfficeTherapists() {
             const today = new Date();
             return this.therapists.filter(t => {
-                const start = new Date(t.outOfOffice?.start);
-                const end = new Date(t.outOfOffice?.end);
-                return start && end && end >= today;
+                const ooo = t.outOfOffice;
+                if (!ooo?.start || !ooo?.end) return false;
+
+                const start = new Date(ooo.start);
+                const end = new Date(ooo.end);
+                return start <= today && today <= end;
             });
         }
 
@@ -1292,15 +1303,6 @@ export default {
             </div>
         </div>
     </div>
-
-    <div v-if="outOfOfficeTherapists.length" class="alert alert-warning mt-3">
-        <strong>🚫 Unavailable Therapists:</strong>
-        <ul class="mb-0">
-            <li v-for="t in outOfOfficeTherapists" :key="t.id">
-            {{ t.name }} (returns on {{ getReturnDate(t.outOfOffice.end) }})
-            </li>
-        </ul>
-     </div>
 
     <!-- FullCalendar component -->
     <FullCalendar 
