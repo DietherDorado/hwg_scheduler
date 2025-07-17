@@ -239,6 +239,7 @@ export default {
         },
         submitEvent() {
             const roomColor = this.rooms[this.form.room] || '#000000' // Default color if room not found
+            const therapistObj = this.therapistMap[this.form.therapist];
             const { frequency } = this.form;
 
             const startDate = new Date(this.form.start);
@@ -253,6 +254,11 @@ export default {
             };
 
             const events = [];
+
+            if (this.isTherapistOutOfOffice(therapistObj)) {
+                alert(`${therapistObj.name} is currently out of office and will return soon!`);
+                return;
+            }
 
             for (let i = 0; i < repeatCount; i++) {
                 let currentStart = new Date(startDate);
@@ -835,6 +841,12 @@ export default {
             const pad = (n) => n.toString().padStart(2, '0');
             const formatted = `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())}T${pad(endDate.getHours())}:${pad(endDate.getMinutes())}`;
             this.form.end = formatted;
+        },
+        isTherapistOutOfOffice(therapist) {
+            const now = new Date();
+            const start = new Date(therapist.outOfOffice?.start);
+            const end = new Date(therapist.outOfOffice?.end);
+            return start && end && now >= start && now <= end;
         }
     },
     computed: {
@@ -939,8 +951,14 @@ export default {
         <label for="therapistDropdown">Filter by Therapist:</label>
         <select v-model="selectedTherapist" id="therapistDropdown">
             <option value="All">All Therapists</option>
-            <option v-for="therapist in therapists" :key="therapist.id" :value="therapist.name">
-            {{ therapist.name }}
+            <option 
+                v-for="therapist in therapists" 
+                :key="therapist.id" 
+                :value="therapist.name"
+                :disabled="isTherapistOutOfOffice(therapist)"
+            >
+                {{ therapist.name }}
+                <span v-if="isTherapistOutOfOffice(therapist)">🚫</span>
             </option>
         </select>
     </div>
@@ -963,8 +981,14 @@ export default {
                     <label class="form-label">Therapist</label>
                     <select v-model="form.therapist" class="form-select" required>
                         <option disabled value="">Select a therapist</option>
-                        <option v-for="therapist in therapists" :key="therapist.id" :value="therapist.name">
-                        {{ therapist.name }}
+                        <option 
+                            v-for="therapist in therapists" 
+                            :key="therapist.id" 
+                            :value="therapist.name"
+                            :disabled="isTherapistOutOfOffice(therapist)"
+                        >
+                            {{ therapist.name }}
+                            <span v-if="isTherapistOutOfOffice(therapist)">🚫</span>
                         </option>
                     </select>
                     </div>
