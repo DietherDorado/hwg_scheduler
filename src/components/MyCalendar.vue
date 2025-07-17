@@ -947,22 +947,6 @@ export default {
 
     <p><strong>Now Viewing:</strong> {{ selectedTherapist }}</p>
 
-    <div 
-        v-if="outOfOfficeTherapists.length" 
-        class="alert alert-warning d-flex flex-column align-items-start p-3 mb-3"
-        style="border-left: 5px solid #ff6f61;"
-    >
-        <strong class="mb-2">🚫 Out of Office</strong>
-        <ul class="mb-0 ps-3">
-            <li 
-                v-for="t in outOfOfficeTherapists" 
-                :key="t.id"
-            >
-                {{ t.name }} (returns {{ getReturnDate(t.outOfOffice.end) }})
-            </li>
-        </ul>
-    </div>
-
     <!-- Schedule Client Modal -->
     <div v-if="showModal" class="modal-overlay">
         <div class="modal-content">
