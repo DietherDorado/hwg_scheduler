@@ -1024,12 +1024,12 @@ export default {
 
                 <div class="modal-section">
                     <div class="col-md-6">
-                    <label class="form-label">Start Time</label>
-                    <input v-model="form.start" type="datetime-local" class="form-control" required />
+                        <label class="form-label">Start Time</label>
+                        <input v-model="form.start" type="datetime-local" class="form-control" required />
                     </div>
                     <div class="col-md-6">
-                    <label class="form-label">End Time</label>
-                    <input v-model="form.end" type="datetime-local" class="form-control" readonly />
+                        <label class="form-label">End Time</label>
+                        <input v-model="form.end" type="datetime-local" class="form-control" :readonly="form.service !== 'Out-of-Office'" />
                     </div>
                 </div>
 
