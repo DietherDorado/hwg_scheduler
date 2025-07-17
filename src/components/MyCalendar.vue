@@ -145,6 +145,9 @@ export default {
 
         this.loadData();
 
+        console.log('Therapists after fetch', this.therapists);
+        console.log('User object:', this.user);
+
         this.calendarOptions.select = this.handleSlotSelect;
         this.calendarOptions.selectAllow = this.selectAllow;
         this.calendarOptions.eventClick = this.handleEventClick;
@@ -737,8 +740,10 @@ export default {
                 // ✅ Update just this.user from that list
                 const currentUser = therapists.find(t => t.id === this.user.id);
                 if (currentUser) {
-                this.user = currentUser;
-                localStorage.setItem('user', JSON.stringify(currentUser));
+                    currentUser.outOfOffice = currentUser.out_of_office;
+                    delete currentUser.out_of_office;
+                    this.user = { ...this.user, outOfOffice: currentUser.out_of_office };
+                    localStorage.setItem('user', JSON.stringify(currentUser));
                 }
 
                 this.showOutOfOfficeModal = false;
@@ -757,6 +762,8 @@ export default {
                 this.therapists = therapistData.sort((a, b) => a.name.localeCompare(b.name));
                 this.therapistMap = {};
                 therapistData.forEach(t => {
+                    t.outOfOffice = t.out_of_office;
+                    delete t.out_of_office;
                     this.therapistMap[t.name] = t;
                 });
 
