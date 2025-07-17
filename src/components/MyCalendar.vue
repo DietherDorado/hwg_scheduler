@@ -843,10 +843,14 @@ export default {
             this.form.end = formatted;
         },
         isTherapistOutOfOffice(therapist) {
+            if (!therapist || !therapist.outOfOffice || !therapist.outOfOffice.start || !therapist.outOfOffice.end) {
+                return false;
+            }
+
             const now = new Date();
-            const start = new Date(therapist.outOfOffice?.start);
-            const end = new Date(therapist.outOfOffice?.end);
-            return start && end && now >= start && now <= end;
+            const start = new Date(therapist.outOfOffice.start);
+            const end = new Date(therapist.outOfOffice.end);
+            return start <= now && now <= end;
         }
     },
     computed: {
