@@ -1330,7 +1330,7 @@ export default {
 
     <!-- Footer -->
     <footer class="bg-light text-center py-4">
-        <p class="mb-0 text-muted">© 2025 HWG Scheduler created by Diether Dorado. All rights reserved.</p>
+        <p class="mb-0 text-muted">© 2025 HWG Scheduler created by Diether Dorado. Enjoy!</p>
     </footer>
 </template>
     
