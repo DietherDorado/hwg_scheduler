@@ -923,7 +923,7 @@ export default {
             <!-- Profile image -->
             <img
             ref="profileImage"
-            src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
+            src="https://i.imgur.com/4LJltFq.png"
             alt="Profile"
             class="rounded-circle"
             style="width: 40px; height: 40px; cursor: pointer; object-fit: cover;"
