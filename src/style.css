@@ -1,5 +1,8 @@
 .card {
-  padding: 2em;
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 
 #app {
@@ -226,13 +229,45 @@
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.bg-light {
+  background: linear-gradient(-45deg, #f0f4ff, #e0f7fa, #f3e5f5, #fffde7);
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
   }
 
-  to {
-    transform: rotate(360deg);
+  50% {
+    background-position: 100% 50%;
   }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.btn-primary {
+  transition: all 0.3s ease;
+}
+.btn-primary:hover {
+  background-color: #004aad;
+  transform: scale(1.03);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.small {
+  font-size: 0.875rem;
+  font-style: italic;
+  opacity: 0.85;
 }
 
 .admin-banner {

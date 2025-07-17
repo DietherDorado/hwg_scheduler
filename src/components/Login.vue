@@ -44,17 +44,22 @@
   
         <!-- Error Message -->
         <p v-if="error" class="mt-3 text-danger text-center">{{ error }}</p>
+
+        <!-- Login Tips or Quotes -->
+        <p class="text-muted text-center mt-4 small" v-if="currentTip">
+          💡 {{ currentTip }}
+        </p>
       </div>
-  
+      
       <!-- Footer -->
       <footer class="mt-5 text-center text-muted small">
-        © 2025 HWG Scheduler created by Diether Dorado. All rights reserved.
+        © 2025 HWG Scheduler created by Diether Dorado. Enjoy!
       </footer>
     </div>
   </template>
   
   <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, onUnmounted } from 'vue'
   import { useRouter } from 'vue-router'
   
   const email = ref('')
@@ -64,6 +69,33 @@
   const users = ref([])
 
   const isLoggingIn = ref(false)
+
+  const tips = [
+    "Stay grounded—your schedule is in your control.",
+    "Take a breath, you’re doing great.",
+    "🧘 Self-care isn’t selfish—it’s smart.",
+    "One session at a time. You’ve got this.",
+    "Your presence is your power. Show up, then shine.",
+    "Healing starts with structure—and we’ve got you."
+  ];
+
+  const currentTip = ref('');
+  let tipInterval = null;
+
+  onMounted(() => {
+    // Random tip every 8 seconds
+    const pickRandomTip = () => {
+      const index = Math.floor(Math.random() * tips.length);
+      currentTip.value = tips[index];
+    };
+
+    pickRandomTip();
+    tipInterval = setInterval(pickRandomTip, 8000);
+  });
+
+  onUnmounted(() => {
+    clearInterval(tipInterval);
+  });
   
   const login = async () => {
     if (isLoggingIn.value) return // Prevent multiple submissions
