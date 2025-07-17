@@ -926,7 +926,7 @@ export default {
             src="https://i.imgur.com/4LJltFq.png"
             alt="Profile"
             class="rounded-circle"
-            style="width: 40px; height: 40px; cursor: pointer; object-fit: cover;"
+            style="width: 60px; height: 60px; cursor: pointer; object-fit: cover;"
             @click="toggleProfileDropdown"
             />
 
