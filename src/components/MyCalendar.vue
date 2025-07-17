@@ -1067,6 +1067,7 @@ export default {
             <ul class="list-unstyled text-start mb-4" style="line-height: 1.8;">
             <li><strong>Title:</strong> {{ selectedEvent?.title }}</li>
             <li><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</li>
+            <li><strong>Service:</strong> {{ selectedEvent?.extendedProps?.service }}</li>
             <li><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</li>
             <li><strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}</li>
             <li><strong>Description:</strong> {{ selectedEvent?.extendedProps?.description }}</li>
