@@ -742,7 +742,7 @@ export default {
                 if (currentUser) {
                     currentUser.outOfOffice = currentUser.out_of_office;
                     delete currentUser.out_of_office;
-                    this.user = { ...this.user, outOfOffice: currentUser.out_of_office };
+                    this.user = currentUser;
                     localStorage.setItem('user', JSON.stringify(currentUser));
                 }
 
