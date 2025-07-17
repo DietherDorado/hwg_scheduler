@@ -145,9 +145,6 @@ export default {
 
         this.loadData();
 
-        console.log('Therapists after fetch', this.therapists);
-        console.log('User object:', this.user);
-
         this.calendarOptions.select = this.handleSlotSelect;
         this.calendarOptions.selectAllow = this.selectAllow;
         this.calendarOptions.eventClick = this.handleEventClick;
@@ -171,8 +168,6 @@ export default {
                 Sunday: []
             }
         }
-
-        // this.user = storedUser;
     },
     beforeUnmount() {
         document.removeEventListener('click', this.handleClickOutsideDropdown);
