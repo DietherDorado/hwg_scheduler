@@ -257,7 +257,7 @@
   transition: all 0.3s ease;
 }
 .btn-primary:hover {
-  background-color: #004aad;
+  background-color: #487467;
   transform: scale(1.03);
 }
 .btn-primary:active {
