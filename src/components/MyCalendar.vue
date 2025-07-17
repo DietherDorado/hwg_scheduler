@@ -830,6 +830,8 @@ export default {
         updateEndTime(start, service) {
             if (!start) return;
 
+            const selectedService = service || this.form.service;
+
             if (service === 'Out-Of-Office') {
                 this.form.end = '';
                 return;
