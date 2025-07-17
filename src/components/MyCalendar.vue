@@ -717,38 +717,28 @@ export default {
         async submitOutOfOffice() {
             try {
                 const res = await authFetch(`https://hwg-backend.onrender.com/therapists/${this.user.id}/out-of-office`, {
-                    method: 'PATCH',
-                    body: JSON.stringify({
-                        start: this.user.outOfOffice.start,
-                        end: this.user.outOfOffice.end
-                    })
+                method: 'PATCH',
+                body: JSON.stringify({
+                    start: this.user.outOfOffice.start,
+                    end: this.user.outOfOffice.end
                 })
-
-                const data = await res.json();
-                this.user.outOfOffice = data.outOfOffice;
-                localStorage.setItem('user', JSON.stringify(this.user));
-
-                if (this.therapistMap[this.user.name]) {
-                    this.therapistMap[this.user.name].outOfOffice = data.outOfOffice;
-                }
-
-                const therapistRes = await authFetch('https://hwg-backend.onrender.com/therapists');
-                const therapistData = await therapistRes.json();
-                this.therapists = therapistData.sort((a, b) => a.name.localeCompare(b.name));
-                this.therapistMap = {};
-                therapistData.forEach(t => {
-                    const parsedOutofOffice = typeof t.out_of_office === 'string' ? JSON.parse(t.out_of_office) : t.out_of_office;
-                    const therapist = {
-                        ...t,
-                        outOfOffice: parsedOutofOffice
-                    }
-                    this.therapistMap[therapist.name] = therapist;
                 });
-                this.therapists = Object.values(this.therapistMap).sort((a, b) => a.name.localeCompare(b.name))
 
-                const matchingTherapist = this.therapistMap[this.user.name];
-                if (matchingTherapist && matchingTherapist.outOfOffice) {
-                    this.user.outOfOffice = matchingTherapist.outOfOffice;
+                if (!res.ok) throw new Error('Failed to update out-of-office');
+
+                // ✅ Re-fetch the full therapist list
+                const updatedList = await authFetch(`https://hwg-backend.onrender.com/therapists`);
+                const therapists = await updatedList.json();
+
+                this.therapists = therapists.sort((a, b) => a.name.localeCompare(b.name));
+                this.therapistMap = {};
+                therapists.forEach(t => { this.therapistMap[t.name] = t });
+
+                // ✅ Update just this.user from that list
+                const currentUser = therapists.find(t => t.id === this.user.id);
+                if (currentUser) {
+                this.user = currentUser;
+                localStorage.setItem('user', JSON.stringify(currentUser));
                 }
 
                 this.showOutOfOfficeModal = false;
@@ -854,12 +844,9 @@ export default {
         outOfOfficeTherapists() {
             const today = new Date();
             return this.therapists.filter(t => {
-                const ooo = t.outOfOffice;
-                if (!ooo?.start || !ooo?.end) return false;
-
-                const start = new Date(ooo.start);
-                const end = new Date(ooo.end);
-                return start <= today && today <= end;
+                const start = new Date(t.outOfOffice?.start);
+                const end = new Date(t.outOfOffice?.end);
+                return start && end && end >= today;
             });
         }
 
@@ -905,8 +892,8 @@ export default {
         </div>
     </div>
 
-    <div v-if="user.outOfOffice && user.outOfOffice.start">
-        <strong>Out of Office:</strong><br>
+    <div v-if="user && user.outOfOffice && user.outOfOffice.start">
+        <strong>Out of Office:</strong><br />
         {{ formatDate(user.outOfOffice.start) }} - {{ formatDate(user.outOfOffice.end) }}
     </div>
 
@@ -1303,6 +1290,15 @@ export default {
             </div>
         </div>
     </div>
+
+    <div v-if="outOfOfficeTherapists.length" class="alert alert-warning mt-3">
+        <strong>🚫 Unavailable Therapists:</strong>
+        <ul class="mb-0">
+            <li v-for="t in outOfOfficeTherapists" :key="t.id">
+            {{ t.name }} (returns on {{ getReturnDate(t.outOfOffice.end) }})
+            </li>
+        </ul>
+     </div>
 
     <!-- FullCalendar component -->
     <FullCalendar 
