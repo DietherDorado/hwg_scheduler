@@ -78,7 +78,7 @@ export default {
             services: [
                 'Intake', 'Individual', 'Couples', 'Family',
                 'Teletherapy', 'KAP Integration', 'KAP Dosing',
-                'KAP Prep'
+                'KAP Prep', 'Out-Of-Office'
             ],
             rooms: {
                 "Kana’s Room": "#8c52ff",
@@ -88,7 +88,8 @@ export default {
                 "Room 1": "#7ed597",
                 "Room 2": "#ffbd59",
                 "Room 3": "#004aad",
-                "Telehealth": "#708b4e"
+                "Telehealth": "#708b4e",
+                "Other": "	#bb0061"
             },
             allEvents: [],
             calendarOptions: {
@@ -828,6 +829,11 @@ export default {
         },
         updateEndTime(start, service) {
             if (!start) return;
+
+            if (service === 'Out-Of-Office') {
+                this.form.end = '';
+                return;
+            }
 
             const startDate = new Date(start);
             const duration = service === 'KAP Dosing' ? 180 : 50;
