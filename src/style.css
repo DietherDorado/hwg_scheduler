@@ -199,6 +199,8 @@
   color: white !important;
   white-space: normal !important;
   overflow-wrap: break-word;
+
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
 }
 
 /* Add spacing for stacked overlapping events */
