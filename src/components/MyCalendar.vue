@@ -43,7 +43,6 @@ export default {
                 therapist: '',
                 service: '',
                 room: '',
-                title: '',
                 start: '',
                 end: '',
                 frequency: 'none', // default to no repeat
@@ -270,7 +269,7 @@ export default {
                 }
 
                 events.push({
-                title: this.form.title,
+                title: this.form.client,
                 start: currentStart.toISOString(),
                 end: currentEnd.toISOString(),
                 backgroundColor: roomColor,
@@ -291,7 +290,6 @@ export default {
                 authFetch('https://hwg-backend.onrender.com/events', {
                     method: 'POST',
                     body: JSON.stringify({
-                        title: event.title,
                         timestart: event.start,
                         timeend: event.end,
                         therapist: event.extendedProps?.therapist, // ✅ fix
@@ -347,7 +345,7 @@ export default {
                 wrapper.style.lineHeight = '1.1';
                 wrapper.style.color = 'white';
                 wrapper.innerHTML = `
-                <strong>‣ ${event.title}</strong><br/>
+                <strong>‣ ${event.client}</strong><br/>
                 <small>👩‍⚕️ ${therapist || ''}</small><br/>
                 <small>🕒 ${startStr} – ${endStr}</small>
                 `;
@@ -358,7 +356,7 @@ export default {
             return {
                 html: `
                 <div style="font-size: 13px;">
-                    <strong>‣ ${event.title}</strong><br/>
+                    👤 ${event.extendedProps?.client || 'Client'}<br/>
                     🕒 ${startStr} – ${endStr}<br/>
                     🛋 ${room || ''}<br/>
                     👩‍⚕️ ${therapist || ''}
@@ -457,7 +455,7 @@ export default {
             const emoji = statusType === 'cancelled' ? '❌' : '❓';
             const statusText = statusType === 'cancelled' ? 'Cancelled' : 'No-Show';
 
-            const originalTitle = this.selectedEvent.title;
+            const originalTitle = this.selectedEvent.client;
 
             if (originalTitle.includes(emoji) || originalTitle.includes('❌') || originalTitle.includes('❓')) {
                 alert(`This session is already marked as ${statusText}.`);
@@ -483,11 +481,11 @@ export default {
         removeEventStatus() {
             if (!this.selectedEvent) return;
 
-            const cleanTitle = this.selectedEvent.title
+            const cleanTitle = this.selectedEvent.client
                 .replace(/^❌\s*/, '')
                 .replace(/^❓\s*/, '');
 
-            if (cleanTitle === this.selectedEvent.title) {
+            if (cleanTitle === this.selectedEvent.client) {
                 alert("This session is not marked as cancelled or no-show.");
                 return;
             }
@@ -1007,8 +1005,8 @@ export default {
                 <h2>📅 Schedule A Client</h2>
                 
                 <div class="modal-section">
-                    <label class="form-label">Session Title</label>
-                    <input v-model="form.title" type="text" class="form-control" placeholder="Enter session title" required />
+                    <label class="form-label">Client Name</label>
+                    <input v-model="form.client" type="text" class="form-control" placeholder="Enter client name" required />
                 </div>
 
                 <div class="modal-section">
@@ -1035,11 +1033,6 @@ export default {
                         <option v-for="service in services" :key="service" :value="service">{{ service }}</option>
                     </select>
                     </div>
-                </div>
-
-                <div class="modal-section">
-                    <label class="form-label">Client Name</label>
-                    <input v-model="form.client" type="text" class="form-control" placeholder="Enter client name" required />
                 </div>
 
                 <div class="modal-section">
@@ -1093,10 +1086,9 @@ export default {
             <h3 class="text-center text-primary fw-bold mb-4">Session Details ✍️</h3>
 
             <ul class="list-unstyled text-start mb-4" style="line-height: 1.8;">
-            <li><strong>Title:</strong> {{ selectedEvent?.title }}</li>
+            <li><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</li>
             <li><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</li>
             <li><strong>Service:</strong> {{ selectedEvent?.extendedProps?.service }}</li>
-            <li><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</li>
             <li><strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}</li>
             <li><strong>Description:</strong> {{ selectedEvent?.extendedProps?.description }}</li>
             <li>
