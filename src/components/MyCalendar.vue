@@ -333,7 +333,7 @@ export default {
             const startStr = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const endStr = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            const { therapist, room } = event.extendedProps || {};
+            const { therapist, room, client } = event.extendedProps || {};
 
             // Condensed for TimeGrid views
             if (viewType.includes('timeGrid')) {
@@ -342,7 +342,7 @@ export default {
                 wrapper.style.lineHeight = '1.1';
                 wrapper.style.color = 'white';
                 wrapper.innerHTML = `
-                <strong>‣ ${event.client}</strong><br/>
+                <strong>‣ ${client || 'Client'}</strong><br/>
                 <small>👩‍⚕️ ${therapist || ''}</small><br/>
                 <small>🕒 ${startStr} – ${endStr}</small>
                 `;
@@ -353,7 +353,7 @@ export default {
             return {
                 html: `
                 <div style="font-size: 13px;">
-                    👤 ${event.extendedProps?.client || 'Client'}<br/>
+                    👤 ${client || 'Client'}<br/>
                     🕒 ${startStr} – ${endStr}<br/>
                     🛋 ${room || ''}<br/>
                     👩‍⚕️ ${therapist || ''}
