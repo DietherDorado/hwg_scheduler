@@ -209,7 +209,6 @@ export default {
                 therapist: '',
                 service: '',
                 room: '',
-                title: '',
                 start: '',
                 end: '',
                 frequency: 'none',
@@ -269,21 +268,19 @@ export default {
                 }
 
                 events.push({
-                title: this.form.client,
-                start: currentStart.toISOString(),
-                end: currentEnd.toISOString(),
-                backgroundColor: roomColor,
-                extendedProps: {
-                    therapist: this.form.therapist,
-                    client: this.form.client,
-                    description: this.form.description,
-                    room: this.form.room,
-                    service: this.form.service,
-                    frequency: this.form.frequency
-                }   
-            });
+                    start: currentStart.toISOString(),
+                    end: currentEnd.toISOString(),
+                    backgroundColor: roomColor,
+                    extendedProps: {
+                        therapist: this.form.therapist,
+                        client: this.form.client,
+                        description: this.form.description,
+                        room: this.form.room,
+                        service: this.form.service,
+                        frequency: this.form.frequency
+                    }
+                });
         }
-
 
             // Submit each event to backend
             Promise.all(events.map(event =>
@@ -463,14 +460,14 @@ export default {
             }
 
             const newTitle = `${emoji} ${originalTitle}`;
-            this.selectedEvent.setProp('title', newTitle);
+            this.selectedEvent.setProp('client', newTitle);
 
             authFetch(`https://hwg-backend.onrender.com/events/${this.selectedEvent.id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ title: newTitle})
+                body: JSON.stringify({ client: newTitle})
             }).then(() => {
                 this.showEventModal = false;
             }).catch(err => {
@@ -490,14 +487,14 @@ export default {
                 return;
             }
 
-            this.selectedEvent.setProp('title', cleanTitle);
+            this.selectedEvent.setProp('client', cleanTitle);
 
             authFetch(`https://hwg-backend.onrender.com/events/${this.selectedEvent.id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ title: cleanTitle })
+                body: JSON.stringify({ client: cleanTitle })
             }).then(() => {
                 this.showEventModal = false;
             }).catch(err => {
