@@ -96,7 +96,7 @@ export default {
                 height: 'auto',
                 themeSystem: 'bootstrap5',
                 plugins: [dayGridPlugin, timeGridPlugin, listPlugin, BootstrapTheme],
-                initialView: 'timeGridWeek',
+                initialView: 'dayGridMonth',
                 views: {
                     timeGridWeek: {
                         slotMinTime: '07:00:00',
