@@ -884,6 +884,15 @@ export default {
         },
         therapistNames() {
             return ['All', ...this.therapists.map(t => t.name)];
+        },
+        filteredOutOfOfficeTherapists() {
+            const today = new Date().toISOString().split('T')[0];
+            return this.outOfOfficeTherapists.filter(t => {
+                return (
+                    t.outOfOffice?.start <= today &&
+                    t.outOfOffice?.end >= today
+                )
+            })
         }
 
     },
@@ -1333,10 +1342,13 @@ export default {
         </div>
     </div>
 
-    <div v-if="outOfOfficeTherapists.length" class="alert alert-warning mt-3">
+    <div 
+        v-if="filteredOutOfOfficeTherapists.length" 
+        class="alert alert-warning mt-3"
+    >
         <strong>🚫 Unavailable Therapists:</strong>
         <ul class="mb-0">
-            <li v-for="t in outOfOfficeTherapists" :key="t.id">
+            <li v-for="t in filteredOutOfOfficeTherapists" :key="t.id">
             {{ t.name }} (returns on {{ getReturnDate(t.outOfOffice.end) }})
             </li>
         </ul>
