@@ -168,8 +168,8 @@
 .fc .fc-event {
   font-size: 14px;
   font-weight: 600;
-  line-height: 1.4;
-  padding: 6px;
+  line-height: 1.2;
+  padding: 4px 6px;
   color: #212529;
   border-radius: 6px;
   overflow-wrap: break-word;
@@ -181,7 +181,7 @@
   filter: brightness(1.1);
   transform: scale(1.02);
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .fc-event-time {
@@ -200,13 +200,17 @@
   color: white !important;
   white-space: normal !important;
   overflow-wrap: break-word;
-
+  border: 1px solid rgba(0, 0, 0, 0.1);
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
 }
 
 /* Add spacing for stacked overlapping events */
 .fc-timegrid-event-harness {
-  min-height: 50px;
+  min-height: 60px;
+}
+
+.fc-timegrid-slot:nth-child(even) {
+  background-color: rgba(240, 240, 240, 0.25);
 }
 
 /* Tweak alignment */
