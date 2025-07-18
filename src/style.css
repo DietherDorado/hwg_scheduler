@@ -192,6 +192,7 @@
 /* Boost spacing and readability in TimeGrid view */
 .fc-timegrid-event {
   padding: 6px 8px;
+  margin: 2px 0;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
@@ -220,6 +221,7 @@
 .fc .fc-timegrid-col .fc-event-time {
   font-size: 12.5px;
   font-weight: 600;
+  text-shadow: 1px 1px 2px black;
 }
 
 .fc .fc-bg-event.unavailable-slot {
