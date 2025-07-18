@@ -854,6 +854,13 @@ export default {
             const start = new Date(therapist.outOfOffice.start);
             const end = new Date(therapist.outOfOffice.end);
             return start <= now && now <= end;
+        },
+        cycleTherapist(direction) {
+            const currentIndex = this.therapistNames.indexOf(this.selectedTherapist);
+            if (currentIndex === -1) return;
+
+            let newIndex = (currentIndex + direction + this.therapistNames.length) % this.therapistNames.length;
+            this.selectedTherapist = this.therapistNames[newIndex];
         }
     },
     computed: {
@@ -874,6 +881,9 @@ export default {
                 const end = new Date(t.outOfOffice?.end);
                 return start && end && end >= today;
             });
+        },
+        therapistNames() {
+            return ['All', ...this.therapists.map(t => t.name)];
         }
 
     },
@@ -970,7 +980,16 @@ export default {
         </select>
     </div>
 
-    <p><strong>Now Viewing:</strong> {{ selectedTherapist }}</p>
+    <div class="d-flex align-items-center justify-content-center gap-3 mt-2">
+        <button class="btn btn-outline-secondary btn-sm" @click="cycleTherapist(-1)" title="Previous Therapist">
+            ◀
+        </button>
+        <p class="mb-0"><strong>Now Viewing:</strong> {{ selectedTherapist }}</p>
+        <button class="btn btn-outline-secondary btn-sm" @click="cycleTherapist(1)" title="Next Therapist">
+            ▶
+        </button>
+    </div>
+
 
     <!-- Schedule Client Modal -->
     <div v-if="showModal" class="modal-overlay">
