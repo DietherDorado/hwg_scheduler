@@ -452,22 +452,22 @@ export default {
             const emoji = statusType === 'cancelled' ? '❌' : '❓';
             const statusText = statusType === 'cancelled' ? 'Cancelled' : 'No-Show';
 
-            const originalTitle = this.selectedEvent.client;
+            const originalClient = this.selectedEvent.extendedProps.client || '';
 
-            if (originalTitle.includes(emoji) || originalTitle.includes('❌') || originalTitle.includes('❓')) {
+            if (originalClient.includes(emoji) || originalClient.includes('❌') || originalClient.includes('❓')) {
                 alert(`This session is already marked as ${statusText}.`);
                 return;
             }
 
-            const newTitle = `${emoji} ${originalTitle}`;
-            this.selectedEvent.setProp('client', newTitle);
+            const newClient = `${emoji} ${originalClient}`;
+            this.selectedEvent.setExtendedProp('client', newClient);
 
             authFetch(`https://hwg-backend.onrender.com/events/${this.selectedEvent.id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ client: newTitle})
+                body: JSON.stringify({ client: newClient})
             }).then(() => {
                 this.showEventModal = false;
             }).catch(err => {
@@ -478,23 +478,23 @@ export default {
         removeEventStatus() {
             if (!this.selectedEvent) return;
 
-            const cleanTitle = this.selectedEvent.client
+            const currentClient = this.selectedEvent.extendedProps.client || '';
+
+            const cleanClient = currentClient
                 .replace(/^❌\s*/, '')
                 .replace(/^❓\s*/, '');
 
-            if (cleanTitle === this.selectedEvent.client) {
+            if (cleanClient === currentClient) {
                 alert("This session is not marked as cancelled or no-show.");
                 return;
             }
 
-            this.selectedEvent.setProp('client', cleanTitle);
+            this.selectedEvent.setExtendedProp('client', cleanClient);
 
             authFetch(`https://hwg-backend.onrender.com/events/${this.selectedEvent.id}`, {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ client: cleanTitle })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ client: cleanClient })
             }).then(() => {
                 this.showEventModal = false;
             }).catch(err => {
