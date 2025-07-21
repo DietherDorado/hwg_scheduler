@@ -43,9 +43,11 @@ export default {
             flatpickrConfig: {
                 enableTime: true,
                 noCalendar: false,
-                dateFormat: 'Y-m-d H:i',
+                dateFormat: 'm/d/Y h:i K',
                 minuteIncrement: 30,
-                time_24hr: false
+                time_24hr: false,
+                altInput: true,
+                altFormat: 'F j, Y h:i K'
             },
             form: {
                 client: '',
