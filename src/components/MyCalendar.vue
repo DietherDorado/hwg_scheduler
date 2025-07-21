@@ -1045,7 +1045,7 @@ export default {
                 <div class="modal-section">
                     <div class="col-md-6">
                         <label class="form-label">Start Time</label>
-                        <input v-model="form.start" type="datetime-local" class="form-control" required />
+                        <input v-model="form.start" type="datetime-local" class="form-control" step="1800" required />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">End Time</label>
