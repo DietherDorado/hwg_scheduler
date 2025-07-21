@@ -43,11 +43,11 @@ export default {
             flatpickrConfig: {
                 enableTime: true,
                 noCalendar: false,
-                dateFormat: 'm/d/Y h:i K',
+                dateFormat: 'Y-m-d H:i',
                 minuteIncrement: 30,
                 time_24hr: false,
                 altInput: true,
-                altFormat: 'F j, Y h:i K'
+                altFormat: 'l, F j, Y h:i K'
             },
             form: {
                 client: '',
@@ -1057,18 +1057,18 @@ export default {
                     <div class="col-md-6">
                         <label class="form-label">Start Time</label>
                         <flat-pickr
+                            class="form-control mb-2"
                             v-model="form.start"
                             :config="flatpickrConfig"
-                            class="form-control"
                             placeholder="Select start time"
                         />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">End Time</label>
                         <flat-pickr
+                            class="form-control mb-2"
                             v-model="form.end"
                             :config="flatpickrConfig"
-                            class="form-control"
                             placeholder="Select end time"
                             :readonly="form.service !== 'Out-Of-Office'"
                         />
