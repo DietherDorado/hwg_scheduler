@@ -7,6 +7,8 @@ import BootstrapTheme from '@fullcalendar/bootstrap5'
 import { useRouter } from 'vue-router'
 import { formatDate } from '@fullcalendar/core/index.js'
 import { reactive, watch } from 'vue'
+import flatPickr from 'vue-flatpickr-component'
+import 'flatpickr/dist/flatpickr.css'
 
 const authFetch = async (urlencoded, options = {}) => {
     const token = localStorage.getItem('token')
@@ -20,7 +22,7 @@ const authFetch = async (urlencoded, options = {}) => {
 
 export default {
     components: {
-        FullCalendar
+        FullCalendar, flatPickr
     },
     data() {
         return {
@@ -38,6 +40,13 @@ export default {
             selectedTherapist: 'All',
             therapistMap: {},
             unavailableBackgrounds: [],
+            flatpickrConfig: {
+                enableTime: true,
+                noCalendar: false,
+                dateFormat: 'Y-m-d H:i',
+                minuteIncrement: 30,
+                time_24hr: false
+            },
             form: {
                 client: '',
                 therapist: '',
@@ -1045,11 +1054,22 @@ export default {
                 <div class="modal-section">
                     <div class="col-md-6">
                         <label class="form-label">Start Time</label>
-                        <input v-model="form.start" type="datetime-local" class="form-control" step="1800" required />
+                        <flat-pickr
+                            v-model="form.start"
+                            :config="flatpickrConfig"
+                            class="form-control"
+                            placeholder="Select start time"
+                        />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">End Time</label>
-                        <input v-model="form.end" type="datetime-local" class="form-control" :readonly="form.service !== 'Out-Of-Office'" />
+                        <flat-pickr
+                            v-model="form.end"
+                            :config="flatpickrConfig"
+                            class="form-control"
+                            placeholder="Select end time"
+                            :readonly="form.service !== 'Out-Of-Office'"
+                        />
                     </div>
                 </div>
 
