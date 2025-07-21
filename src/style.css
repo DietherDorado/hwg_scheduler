@@ -315,4 +315,10 @@
   border-radius: 5px;
   padding: 0.5rem;
   font-size: 1rem;
+  max-width: 300px;
+  text-align: center;
+}
+
+select.form-select {
+  text-align: center;
 }

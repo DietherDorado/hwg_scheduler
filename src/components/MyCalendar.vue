@@ -1017,10 +1017,11 @@ export default {
                     <input v-model="form.client" type="text" class="form-control" placeholder="Enter client name" required />
                 </div>
 
-                <div class="modal-section">
-                    <div class="col-md-6">
+                <div class="modal-section text-center">
+                    <!-- Select Therapist -->
+                    <div class="form-group mb-3 d-flex flex-column align-items-center">
                     <label class="form-label">Therapist</label>
-                    <select v-model="form.therapist" class="form-select" required>
+                    <select v-model="form.therapist" class="form-select w-75" required>
                         <option disabled value="">Select a therapist</option>
                         <option 
                             v-for="therapist in therapists" 
@@ -1032,11 +1033,11 @@ export default {
                             <span v-if="isTherapistOutOfOffice(therapist)">🚫</span>
                         </option>
                     </select>
-                    </div>
+                </div>
 
-                    <div class="col-md-6">
+                <div class="form-group mb-3 d-flex flex-column align-items-center">
                     <label class="form-label">Service</label>
-                    <select v-model="form.service" class="form-select" required>
+                    <select v-model="form.service" class="form-select w-75" required>
                         <option disabled value="">Select a service</option>
                         <option v-for="service in services" :key="service" :value="service">{{ service }}</option>
                     </select>
@@ -1053,8 +1054,7 @@ export default {
                     </select>
                 </div>
 
-                <div class="modal-section">
-                    <div class="col-md-6">
+                <div class="form-group mb-3 d-flex flex-column align-items-center">
                         <label class="form-label">Start Time</label>
                         <flat-pickr
                             class="form-control mb-2"
@@ -1062,8 +1062,6 @@ export default {
                             :config="flatpickrConfig"
                             placeholder="Select start time"
                         />
-                    </div>
-                    <div class="col-md-6">
                         <label class="form-label">End Time</label>
                         <flat-pickr
                             class="form-control mb-2"
@@ -1072,7 +1070,6 @@ export default {
                             placeholder="Select end time"
                             :readonly="form.service !== 'Out-Of-Office'"
                         />
-                    </div>
                 </div>
 
                 <div class="modal-section">
