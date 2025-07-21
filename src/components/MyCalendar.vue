@@ -1044,9 +1044,9 @@ export default {
                     </div>
                 </div>
 
-                <div class="modal-section">
+                <div class="form-group mb-3 d-flex flex-column align-items-center">
                     <label class="form-label">Room</label>
-                    <select v-model="form.room" class="form-select" required>
+                    <select v-model="form.room" class="form-select w-75 text-center" required>
                     <option disabled value="">Select a room</option>
                     <option v-for="(color, name) in rooms" :key="name" :value="name">
                         {{ name }}
