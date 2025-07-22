@@ -1367,10 +1367,9 @@ export default {
         <strong>🚫 Unavailable Therapists:</strong>
         <ul class="mb-0 ps-3">
             <li v-for="t in filteredOutOfOfficeTherapists" :key="t.id">
-            <strong>{{ t.name }}</strong><br />
-            Out of office from 
+            <strong>{{ t.name }}</strong> :
             <em>{{ getReturnDate(t.outOfOffice.start) }}</em> 
-            to 
+            ⇨ 
             <em>{{ getReturnDate(t.outOfOffice.end) }}</em>
             </li>
         </ul>
