@@ -838,9 +838,9 @@ export default {
                 month: 'short',       // Jul
                 day: 'numeric',       // 21
                 year: 'numeric',      // 2025
-                hour: 'numeric',      // 1
-                minute: '2-digit',    // 00
-                hour12: true          // AM/PM
+                // hour: 'numeric',      // 1
+                // minute: '2-digit',    // 00
+                // hour12: true          // AM/PM
             });
         },
         updateEndTime(start, service) {
