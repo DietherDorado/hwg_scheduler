@@ -829,9 +829,19 @@ export default {
             return new Date(dateStr).toLocaleDateString(undefined, options);
         },
         getReturnDate(end) {
+            if (!end) return '';
             const date = new Date(end);
-            date.setDate(date.getDate() + 1);
-            return date.toISOString().split('T')[0];
+            // If you still want to add a day (like your original version), uncomment this:
+            // date.setDate(date.getDate() + 1);
+            return date.toLocaleString('en-US', {
+                weekday: 'short',     // Mon
+                month: 'short',       // Jul
+                day: 'numeric',       // 21
+                year: 'numeric',      // 2025
+                hour: 'numeric',      // 1
+                minute: '2-digit',    // 00
+                hour12: true          // AM/PM
+            });
         },
         updateEndTime(start, service) {
             if (!start) return;
@@ -1355,12 +1365,16 @@ export default {
         class="alert alert-warning mt-3"
     >
         <strong>🚫 Unavailable Therapists:</strong>
-        <ul class="mb-0">
+        <ul class="mb-0 ps-3">
             <li v-for="t in filteredOutOfOfficeTherapists" :key="t.id">
-            {{ t.name }} (OOO from: {{ getReturnDate(t.outOfOffice.start) }} {{ getReturnDate(t.outOfOffice.end) }})
+            <strong>{{ t.name }}</strong><br />
+            Out of office from 
+            <em>{{ getReturnDate(t.outOfOffice.start) }}</em> 
+            to 
+            <em>{{ getReturnDate(t.outOfOffice.end) }}</em>
             </li>
         </ul>
-     </div>
+    </div>
 
     <!-- FullCalendar component -->
     <FullCalendar 
