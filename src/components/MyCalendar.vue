@@ -1357,7 +1357,7 @@ export default {
         <strong>🚫 Unavailable Therapists:</strong>
         <ul class="mb-0">
             <li v-for="t in filteredOutOfOfficeTherapists" :key="t.id">
-            {{ t.name }} (returns on {{ getReturnDate(t.outOfOffice.end) }})
+            {{ t.name }} (OOO from: {{ getReturnDate(t.outOfOffice.start) }} {{ getReturnDate(t.outOfOffice.end) }})
             </li>
         </ul>
      </div>
