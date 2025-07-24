@@ -1187,11 +1187,19 @@ export default {
                     <option v-for="(color, name) in rooms" :key="name" :value="name">{{  name }}</option>
                 </select>
 
-                <label>Start</label>
-                <input type="datetime-local" class="form-control mb-2" v-model="editForm.start" />
+                <label>Start Time</label>
+                    <flat-pickr
+                    class="form-control mb-2"
+                    v-model="editForm.start"
+                    :config="flatpickrConfig"
+                    />
 
-                <label>End</label>
-                <input type="datetime-local" class="form-control mb-2" v-model="editForm.end" />
+                <label>End Time</label>
+                    <flat-pickr
+                    class="form-control mb-2"
+                    v-model="editForm.end"
+                    :config="flatpickrConfig"
+                    />
 
                 <label>Description</label>
                 <textarea class="form-control mb-3" v-model="editForm.description"></textarea>
