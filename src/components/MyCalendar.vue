@@ -226,15 +226,15 @@ export default {
             this.editMode = false;
 
             const props = info.event.extendedProps || {};
-            this.editForm = Object.assign({}, this.editForm, {
+            this.editForm = {
                 client: props.client || '',
                 therapist: props.therapist || '',
                 service: props.service || '',
                 room: props.room || '',
-                start: info.event.start ? new Date(info.event.start) : null,
-                end: info.event.end ? new Date(info.event.end) : null,
                 description: props.description || ''
-            });
+            }
+            this.editForm.start = new Date(info.event.start);
+            this.editForm.end = new Date(info.event.end);
         },
         selectAllow(selectInfo) {
             const allowed = this.isWithinTherapistAvailability(selectInfo.start, selectInfo.end);
@@ -1189,26 +1189,20 @@ export default {
 
                 <label>Start Time</label>
                     <flat-pickr
-                        v-if="editForm.start"
-                        class="form-control mb-2"
-                        v-model="editForm.start"
-                        :config="flatpickrConfig"
+                    class="form-control mb-2"
+                    v-model="editForm.start"
+                    :config="flatpickrConfig"
                     />
 
-                <div class="modal-section">
-                    <label>End Time</label>
+                <label>End Time</label>
                     <flat-pickr
-                        v-if="editForm.end"
-                        class="form-control"
-                        v-model="editForm.end"
-                        :config="flatpickrConfig"
+                    class="form-control mb-2"
+                    v-model="editForm.end"
+                    :config="flatpickrConfig"
                     />
-                </div>
 
-                <div class="modal-section">
-                    <label>Description</label>
-                    <textarea class="form-control" v-model="editForm.description"></textarea>
-                </div>
+                <label>Description</label>
+                <textarea class="form-control mb-3" v-model="editForm.description"></textarea>
 
                 <div class="d-flex justify-content-between">
                     <button class="btn btn-success w-50 me-2" @click="submitEventEdit">💾 Save</button>
