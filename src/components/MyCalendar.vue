@@ -59,6 +59,17 @@ export default {
                 frequency: 'none', // default to no repeat
                 description: ''
             },
+            editMode: false,
+            editForm: {
+                client: '',
+                therapist: '',
+                service: '',
+                room: '',
+                start: '',
+                end: '',
+                frequency: 'none', // default to no repeat
+                description: ''
+            },
             therapists: [],
             showTherapistDropdown: false,
             showAddTherapistModal: false,
@@ -205,8 +216,21 @@ export default {
                 info.jsEvent.preventDefault();
                 return;
             }
+
             this.selectedEvent = info.event;
             this.showEventModal = true;
+            this.editMode = false;
+
+            const props = info.event.extendedProps || {};
+            this.editForm = {
+                client: props.client || '',
+                therapist: props.therapist || '',
+                service: props.service || '',
+                room: props.room || '',
+                start: info.event.start.toISOString().slice(0, 16),
+                end: info.event.end.toISOString().slice(0, 16),
+                description: props.description || ''
+            }
         },
         selectAllow(selectInfo) {
             const allowed = this.isWithinTherapistAvailability(selectInfo.start, selectInfo.end);
@@ -814,6 +838,32 @@ export default {
                 alert('Failed to load calendar data.');
             }
         },
+        async submitEventEdit() {
+            try {
+                const updated = {
+                    timestart: new Date(this.editForm.start).toISOString(),
+                    timeend: new Date(this.editForm.end).toISOString(),
+                    client: this.editForm.client,
+                    therapist: this.editForm.therapist,
+                    service: this.editForm.service,
+                    room: this.editForm.room,
+                    description: this.editForm.description,
+                    backgroundColor: this.rooms[this.editForm.room] || '#000'
+                };
+
+                await authFetch(`https://hwg-backend.onrender.com/events/${this.selectedEvent.id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(updated)
+                });
+
+                this.showEventModal = false;
+                this.editMode = false;
+                await this.loadData(); // reload updated events
+            } catch (err) {
+                console.error("Failed to update event:", err);
+                alert("Something went wrong while saving changes.");
+            }
+        },
         clearUserAvailability(day) {
             this.user.availability[day] = [];
         },
@@ -1109,40 +1159,67 @@ export default {
     <!-- Event Details Modal -->
     <div v-if="showEventModal" class="modal-overlay" @click.self="showEventModal = false">
         <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 500px; max-width: 95%;">
-            <h3 class="text-center text-primary fw-bold mb-4">Session Details ✍️</h3>
+            <h3 class="text-center text-primary fw-bold mb-4">
+                {{  editMode ? 'Edit Session 🛠️' : 'Session Details ✍️' }}
+            </h3>
+            
+            <!-- Editable View -->
+             <div v-if="editMode">
+                <label>Client</label>
+                <input class="form-control mb-2" v-model="editForm.client" />
 
-            <ul class="list-unstyled text-start mb-4" style="line-height: 1.8;">
-            <li><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</li>
-            <li><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</li>
-            <li><strong>Service:</strong> {{ selectedEvent?.extendedProps?.service }}</li>
-            <li><strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}</li>
-            <li><strong>Description:</strong> {{ selectedEvent?.extendedProps?.description }}</li>
-            <li>
-                <strong>Time:</strong>
-                {{
-                new Date(selectedEvent?.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                }} – 
-                {{
-                new Date(selectedEvent?.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                }}
-            </li>
-            </ul>
+                <label>Therapist</label>
+                <select class="form-control mb-2" v-model="editForm.therapist">
+                    <option v-for="t in therapists" :key="t.id" :value="t.name"?>{{  t.name }}</option>
+                </select>
+
+                <label>Service</label>
+                <select class="form-control mb-2" v-model="editForm.service">
+                    <option v-for="s in services" :key="s" :value="s">{{  s  }}</option>
+                </select>
+
+                <label>Start</label>
+                <input type="datetime-local" class="form-control mb-2" v-model="editForm.start" />
+
+                <label>End</label>
+                <input type="datetime-local" class="form-control mb-2" v-model="editForm.end" />
+
+                <label>Description</label>
+                <textarea class="form-control mb-3" v-model="editForm.description" />
+
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-success w-50 me-2" @click="submitEventEdit">💾 Save</button>
+                    <button class="btn btn-secondary w-50" @click="editMode = false">Cancel</button>
+                </div>
+             </div>
+
+            <!-- 🔒 Read-Only View -->
+            <div v-else>
+                <ul class="list-unstyled text-start mb-4" style="line-height: 1.8;">
+                    <li><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</li>
+                    <li><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</li>
+                    <li><strong>Service:</strong> {{ selectedEvent?.extendedProps?.service }}</li>
+                    <li><strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}</li>
+                    <li><strong>Description:</strong> {{ selectedEvent?.extendedProps?.description }}</li>
+                    <li>
+                    <strong>Time:</strong>
+                    {{ new Date(selectedEvent?.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                    -
+                    {{ new Date(selectedEvent?.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                    </li>
+                </ul>
 
             <div class="d-flex flex-wrap justify-content-center gap-2">
-            <button class="btn btn-danger" @click="markEventStatus('cancelled')">❌ Cancelled</button>
-            <button class="btn btn-warning text-white" @click="markEventStatus('no-show')">❓ No-Show</button>
-            <button class="btn btn-outline-primary" @click="removeEventStatus">🔄 Clear</button>
-            <button class="btn btn-dark" @click="showEventModal = false">✖ Close</button>
-            <button 
-                v-if="isAdmin"
-                class="btn btn-outline-danger"
-                @click="deleteEvent"
-            >
-                🗑️ Delete
-            </button>
+                <button class="btn btn-outline-secondary" @click="editMode = true">✏️ Edit</button>
+                <button class="btn btn-danger" @click="markEventStatus('cancelled')">❌ Cancelled</button>
+                <button class="btn btn-warning text-white" @click="markEventStatus('no-show')">❓ No-Show</button>
+                <button class="btn btn-outline-primary" @click="removeEventStatus">🔄 Clear</button>
+                <button class="btn btn-dark" @click="showEventModal = false">✖ Close</button>
+                <button v-if="isAdmin" class="btn btn-outline-danger" @click="deleteEvent">🗑️ Delete</button>
             </div>
         </div>
     </div>
+</div>
 
 
 
