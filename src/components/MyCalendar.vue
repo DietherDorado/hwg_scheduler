@@ -97,7 +97,7 @@ export default {
                 }
             },
             services: [
-                'Intake', 'Individual', 'Couples', 'Family',
+                'Individual', 'Couples', 'Family', 'Intake',
                 'Teletherapy', 'KAP Integration', 'KAP Dosing',
                 'KAP Prep', 'Out-Of-Office'
             ],
@@ -126,6 +126,10 @@ export default {
                         selectMinDistance: 1,
                         selectLongPressDelay: 0,
                         eventLongPressDelay: 0,
+                    },
+                    timeGridDay: {
+                        slotMinTime: '07:00:00',
+                        slotMaxTime: '21:00:00'
                     }
                 },
                 weekends: true,
