@@ -231,10 +231,10 @@ export default {
                 therapist: props.therapist || '',
                 service: props.service || '',
                 room: props.room || '',
-                start: info.event.start.toISOString().slice(0, 16),
-                end: info.event.end.toISOString().slice(0, 16),
                 description: props.description || ''
             }
+            this.editForm.start = new Date(info.event.start);
+            this.editForm.end = new Date(info.event.end);
         },
         selectAllow(selectInfo) {
             const allowed = this.isWithinTherapistAvailability(selectInfo.start, selectInfo.end);
