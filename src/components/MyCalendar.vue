@@ -226,15 +226,15 @@ export default {
             this.editMode = false;
 
             const props = info.event.extendedProps || {};
-            this.editForm = {
+            this.editForm = Object.assign({}, this.editForm, {
                 client: props.client || '',
                 therapist: props.therapist || '',
                 service: props.service || '',
                 room: props.room || '',
+                start: info.event.start ? new Date(info.event.start) : null,
+                end: info.event.end ? new Date(info.event.end) : null,
                 description: props.description || ''
-            }
-            this.editForm.start = new Date(info.event.start);
-            this.editForm.end = new Date(info.event.end);
+            });
         },
         selectAllow(selectInfo) {
             const allowed = this.isWithinTherapistAvailability(selectInfo.start, selectInfo.end);
@@ -1189,16 +1189,18 @@ export default {
 
                 <label>Start Time</label>
                     <flat-pickr
-                    class="form-control mb-2"
-                    v-model="editForm.start"
-                    :config="flatpickrConfig"
+                        v-if="editForm.start"
+                        class="form-control mb-2"
+                        v-model="editForm.start"
+                        :config="flatpickrConfig"
                     />
 
                 <label>End Time</label>
                     <flat-pickr
-                    class="form-control mb-2"
-                    v-model="editForm.end"
-                    :config="flatpickrConfig"
+                        v-if="editForm.end"
+                        class="form-control mb-2"
+                        v-model="editForm.end"
+                        :config="flatpickrConfig"
                     />
 
                 <label>Description</label>
