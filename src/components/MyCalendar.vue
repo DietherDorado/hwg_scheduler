@@ -1170,12 +1170,17 @@ export default {
 
                 <label>Therapist</label>
                 <select class="form-control mb-2" v-model="editForm.therapist">
-                    <option v-for="t in therapists" :key="t.id" :value="t.name"?>{{  t.name }}</option>
+                    <option v-for="t in therapists" :key="t.id" :value="t.name">{{  t.name }}</option>
                 </select>
 
                 <label>Service</label>
                 <select class="form-control mb-2" v-model="editForm.service">
                     <option v-for="s in services" :key="s" :value="s">{{  s  }}</option>
+                </select>
+
+                <label>Room</label>
+                <select class="form-control mb-2" v-model="editForm.room">
+                    <option v-for="(color, name) in rooms" :key="name" :value="name">{{  name }}</option>
                 </select>
 
                 <label>Start</label>
@@ -1185,7 +1190,7 @@ export default {
                 <input type="datetime-local" class="form-control mb-2" v-model="editForm.end" />
 
                 <label>Description</label>
-                <textarea class="form-control mb-3" v-model="editForm.description" />
+                <textarea class="form-control mb-3" v-model="editForm.description"></textarea>
 
                 <div class="d-flex justify-content-between">
                     <button class="btn btn-success w-50 me-2" @click="submitEventEdit">💾 Save</button>
