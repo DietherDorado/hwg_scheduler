@@ -1195,16 +1195,20 @@ export default {
                         :config="flatpickrConfig"
                     />
 
-                <label>End Time</label>
+                <div class="modal-section">
+                    <label>End Time</label>
                     <flat-pickr
                         v-if="editForm.end"
-                        class="form-control mb-2"
+                        class="form-control"
                         v-model="editForm.end"
                         :config="flatpickrConfig"
                     />
+                </div>
 
-                <label>Description</label>
-                <textarea class="form-control mb-3" v-model="editForm.description"></textarea>
+                <div class="modal-section">
+                    <label>Description</label>
+                    <textarea class="form-control" v-model="editForm.description"></textarea>
+                </div>
 
                 <div class="d-flex justify-content-between">
                     <button class="btn btn-success w-50 me-2" @click="submitEventEdit">💾 Save</button>
