@@ -3,6 +3,7 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import listPlugin from '@fullcalendar/list'
+import interactionPlugin from '@fullcalendar/interaction'
 import BootstrapTheme from '@fullcalendar/bootstrap5'
 import { useRouter } from 'vue-router'
 import { formatDate } from '@fullcalendar/core/index.js'
@@ -116,7 +117,7 @@ export default {
             calendarOptions: {
                 height: 'auto',
                 themeSystem: 'bootstrap5',
-                plugins: [dayGridPlugin, timeGridPlugin, listPlugin, BootstrapTheme],
+                plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, BootstrapTheme],
                 initialView: 'timeGridWeek',
                 views: {
                     timeGridWeek: {
@@ -147,7 +148,7 @@ export default {
                 longPressDelay: 0,
                 selectLongPressDelay: 0,
                 eventLongPressDelay: 0,
-                select: null,
+                select: this.handleSlotSelect,
                 selectAllow: null,
                 eventClick: null,
                 eventSources: [], // will be filled with data later
