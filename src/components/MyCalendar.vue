@@ -256,11 +256,8 @@ export default {
             }
         },
         handleSlotSelect(selectionInfo) {
-            const start = new Date(selectionInfo.start)
-            const end = new Date(start.getTime() + 60 * 60 * 1000) // Default to 1 hour duration
-
-            this.form.start = start.toISOString().slice(0, 16) // Format to datetime-local
-            this.form.end = end.toISOString().slice(0, 16) // Format to datetime-local
+            this.form.start = selectionInfo.start; // already a Date object
+            this.form.end = selectionInfo.end;
 
             if (this.selectedTherapist !== 'All') {
                 this.form.therapist = this.selectedTherapist;
