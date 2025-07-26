@@ -125,7 +125,7 @@ export default {
                 "Neuro Room": "#ffde59",
                 "Room 1": "#7ed597",
                 "Room 2": "#ffbd59",
-                "Room 3": "#004aad",
+                "Room 3": "#ffb3ba",
                 "Telehealth": "#708b4e",
                 "Other": "	#bb0061"
             },
