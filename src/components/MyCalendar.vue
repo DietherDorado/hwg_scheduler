@@ -41,6 +41,22 @@ export default {
             selectedTherapist: 'All',
             therapistMap: {},
             unavailableBackgrounds: [],
+            gifsByDay: [
+                // Sunday
+                'https://media1.tenor.com/m/8J5RHMsLT7AAAAAC/the-simpsons-homer-simpson.gif',
+                // Monday
+                'https://media.tenor.com/cko8V8g8QCoAAAAj/monday-day.gif',
+                // Tuesday
+                'https://media.tenor.com/DH1UnQXJBlEAAAAj/tuesday-day.gif',
+                // Wednesday
+                'https://media1.tenor.com/m/-zQsh1umeigAAAAd/funny.gif',
+                // Thursday
+                'https://media.tenor.com/uM0gyI4Wv-AAAAAi/thursday-day.gif',
+                // Friday
+                'https://media1.tenor.com/m/8J5RHMsLT7AAAAAC/the-simpsons-homer-simpson.gif',
+                // Saturday
+                'https://media1.tenor.com/m/8J5RHMsLT7AAAAAC/the-simpsons-homer-simpson.gif'
+            ],
             flatpickrConfig: {
                 enableTime: true,
                 noCalendar: false,
@@ -932,6 +948,10 @@ export default {
         }
     },
     computed: {
+        dailyGif() {
+            const today = new Date().getDay()
+            return this.gifsByDay[today]
+        },
         filteredEvents() {
             if (!this.allEvents || !this.therapistMap) return [];
 
@@ -988,7 +1008,7 @@ export default {
             HWG Scheduler <small v-if="user" class="ms-3 fs-5 text-muted">– Welcome, {{ user.name }}</small>
         </h1>
         <p class="lead text-center text-muted">Easily manage therapist schedules and client sessions</p>
-        <img src="https://media.tenor.com/d7dy6PrZ-EMAAAAi/inspiration-you-guys-eric-cartman.gif" alt="cartman" style="width: 200px;" />
+        <img :src="dailyGif" alt="Daily GIF" style="width: 200px;" />
     </div>
 
     <div v-if="isAdmin" class="admin-banner">
