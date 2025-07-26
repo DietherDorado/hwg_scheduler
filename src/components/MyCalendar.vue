@@ -988,6 +988,7 @@ export default {
             HWG Scheduler <small v-if="user" class="ms-3 fs-5 text-muted">– Welcome, {{ user.name }}</small>
         </h1>
         <p class="lead text-center text-muted">Easily manage therapist schedules and client sessions</p>
+        <img src="https://media.tenor.com/d7dy6PrZ-EMAAAAi/inspiration-you-guys-eric-cartman.gif" alt="cartman" style="width: 200px;" />
     </div>
 
     <div v-if="isAdmin" class="admin-banner">
