@@ -46,9 +46,11 @@
             </div>
 
             <!-- Login Button -->
-            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2" :disabled="isLoggingIn">
-              <span v-if="isLoggingIn" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              {{ isLoggingIn ? 'Logging in...' : '🚪 Login' }}
+            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 d-flex justify-content-center align-items-center gap-2" :disabled="isLoggingIn">
+              <div v-if="isLoggingIn" class="spinner-border spinner-border-sm text-light" role="status">
+                <span class="visually-hidden">Logging in...</span>
+              </div>
+              <span>{{ isLoggingIn ? 'Logging in...' : '🚪 Login' }}</span>
             </button>
         </form>
   
