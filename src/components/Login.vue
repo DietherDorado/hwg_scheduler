@@ -24,21 +24,30 @@
             </div>
 
             <!-- Password Input -->
-            <div class="form-floating mb-3">
+            <div class="form-floating mb-3 position-relative">
               <input
                 v-model="password"
-                type="password"
+                :type="showPassword ? 'text' : 'password'"
                 class="form-control rounded-3"
                 id="passwordInput"
                 placeholder="Enter your password"
                 autocomplete="off"
               />
               <label for="passwordInput">Password</label>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary position0absolute top-50 end-0 translate-middle-y me-3"
+                @click="showPassword = !showPassword"
+                tabindex="-1"
+              >
+                {{ showPassword ? 'Hide' : 'Show' }}
+              </button>
             </div>
 
             <!-- Login Button -->
             <button type="submit" class="btn btn-primary w-100 rounded-pill py-2" :disabled="isLoggingIn">
-              🚪 Login
+              <span v-if="isLoggingIn" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              {{ isLoggingIn ? 'Logging in...' : '🚪 Login' }}
             </button>
         </form>
   
@@ -67,6 +76,7 @@
   const error = ref('')
   const router = useRouter()
   const users = ref([])
+  const showPassword = ref(false)
 
   const isLoggingIn = ref(false)
 
