@@ -28,7 +28,7 @@
               <input
                 v-model="password"
                 :type="showPassword ? 'text' : 'password'"
-                class="form-control rounded-3"
+                class="form-control rounded-3 pe-5"
                 id="passwordInput"
                 placeholder="Enter your password"
                 autocomplete="off"
@@ -36,11 +36,12 @@
               <label for="passwordInput">Password</label>
               <button
                 type="button"
-                class="btn btn-sm btn-outline-secondary position0absolute top-50 end-0 translate-middle-y me-3"
+                class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-3"
                 @click="showPassword = !showPassword"
                 tabindex="-1"
+                aria-label="Toggle password visibility"
               >
-                {{ showPassword ? 'Hide' : 'Show' }}
+                <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
               </button>
             </div>
 
@@ -148,6 +149,10 @@
   @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+  }
+
+  .spinner-border {
+  vertical-align: middle;
   }
   </style>
   
