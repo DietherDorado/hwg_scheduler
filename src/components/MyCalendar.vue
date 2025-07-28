@@ -967,15 +967,17 @@ export default {
             return ['All', ...this.therapists.map(t => t.name)];
         },
         filteredOutOfOfficeTherapists() {
-            const today = new Date().toISOString().split('T')[0];
-            return this.outOfOfficeTherapists.filter(t => {
-                return (
-                    t.outOfOffice?.start <= today &&
-                    t.outOfOffice?.end >= today
-                )
-            })
-        }
+            const today = new Date();
+            const oneWeekFromNow = new Date();
+            oneWeekFromNow.setDate(today.getDate() + 7);
 
+            return this.outOfOfficeTherapists.filter(t => {
+                const start = new Date(t.outOfOffice?.start);
+                const end = new Date(t.outOfOffice?.end);
+
+                return start && end && start <= oneWeekFromNow && end >= today;
+            });
+        }
     },
     watch: {
         selectedTherapist() {
@@ -1221,7 +1223,7 @@ export default {
                     <li><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</li>
                     <li><strong>Service:</strong> {{ selectedEvent?.extendedProps?.service }}</li>
                     <li><strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}</li>
-                    
+
                     <li>
                     <strong>Time:</strong>
                     {{ new Date(selectedEvent?.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
