@@ -73,8 +73,7 @@ export default {
                 room: '',
                 start: '',
                 end: '',
-                frequency: 'none', // default to no repeat
-                description: ''
+                frequency: 'none' // default to no repeat
             },
             editMode: false,
             editForm: {
@@ -84,8 +83,7 @@ export default {
                 room: '',
                 start: '',
                 end: '',
-                frequency: 'none', // default to no repeat
-                description: ''
+                frequency: 'none' // default to no repeat
             },
             therapists: [],
             showTherapistDropdown: false,
@@ -248,7 +246,6 @@ export default {
                 therapist: props.therapist || '',
                 service: props.service || '',
                 room: props.room || '',
-                description: props.description || ''
             }
             this.editForm.start = new Date(info.event.start);
             this.editForm.end = new Date(info.event.end);
@@ -267,8 +264,7 @@ export default {
                 room: '',
                 start: '',
                 end: '',
-                frequency: 'none',
-                description: ''
+                frequency: 'none'
             }
         },
         handleSlotSelect(selectionInfo) {
@@ -327,7 +323,6 @@ export default {
                     extendedProps: {
                         therapist: this.form.therapist,
                         client: this.form.client,
-                        description: this.form.description,
                         room: this.form.room,
                         service: this.form.service,
                         frequency: this.form.frequency
@@ -346,7 +341,6 @@ export default {
                         client: event.extendedProps?.client,
                         service: event.extendedProps?.service,
                         room: event.extendedProps?.room,
-                        description: event.extendedProps?.description,
                         frequency: event.extendedProps?.frequency,
                         backgroundColor: event.backgroundColor,
                     })
@@ -865,7 +859,6 @@ export default {
                     therapist: this.editForm.therapist,
                     service: this.editForm.service,
                     room: this.editForm.room,
-                    description: this.editForm.description,
                     backgroundColor: this.rooms[this.editForm.room] || '#000'
                 };
 
@@ -1156,11 +1149,6 @@ export default {
                 </div>
 
                 <div class="modal-section">
-                    <label class="form-label">Description</label>
-                    <textarea v-model="form.description" class="form-control" rows="3" placeholder="Add any notes..."></textarea>
-                </div>
-
-                <div class="modal-section">
                     <label class="form-label">Frequency</label>
                     <select v-model="form.frequency" class="form-select">
                     <option value="none">Doesn't repeat</option>
@@ -1220,9 +1208,6 @@ export default {
                     :config="flatpickrConfig"
                     />
 
-                <label>Description</label>
-                <textarea class="form-control mb-3" v-model="editForm.description"></textarea>
-
                 <div class="d-flex justify-content-between">
                     <button class="btn btn-success w-50 me-2" @click="submitEventEdit">💾 Save</button>
                     <button class="btn btn-secondary w-50" @click="editMode = false">Cancel</button>
@@ -1236,7 +1221,7 @@ export default {
                     <li><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</li>
                     <li><strong>Service:</strong> {{ selectedEvent?.extendedProps?.service }}</li>
                     <li><strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}</li>
-                    <li><strong>Description:</strong> {{ selectedEvent?.extendedProps?.description }}</li>
+                    
                     <li>
                     <strong>Time:</strong>
                     {{ new Date(selectedEvent?.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
