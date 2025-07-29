@@ -37,6 +37,7 @@ export default {
             showModal: false,
             showEventModal: false,
             showProfileDropdown: false,
+            deletingEvent: false,
             selectedEvent: null,
             selectedTherapist: 'All',
             therapistMap: {},
@@ -553,26 +554,32 @@ export default {
             localStorage.removeItem('user')
             this.$router.push('/')
         },
-        deleteEvent() {
+        async deleteEvent() {
             if (!this.selectedEvent) return;
 
             const confirmed = confirm("Are you sure you want to delete this session? This action cannot be undone.");
             if (!confirmed) return;
 
-            const eventToDelete = this.selectedEvent;
+            this.deletingEvent = true;
 
-            // Immediate UI feedback
-            eventToDelete.remove();
-            this.showEventModal = false;
+            try {
+                const eventToDelete = this.selectedEvent;
 
-            // Continue with API request in background
-            authFetch(`https://hwg-backend.onrender.com/events/${eventToDelete.id}`, {
-                method: 'DELETE'
-            }).catch(err => {
+                // Immediate UI feedback
+                eventToDelete.remove();
+                this.showEventModal = false;
+
+                await authFetch(`https://hwg-backend.onrender.com/events/${eventToDelete.id}`, {
+                    method: 'DELETE'
+                });
+
+                await this.loadData();
+            } catch (err) {
                 console.error('Failed to delete event:', err);
-                alert('Error deleting session. Please refresh the page.');
-                // Optionally re-fetch events here if needed
-            });
+                alert('Error deleting session. Please try again later.');
+            } finally {
+                this.deletingEvent = false;
+            }
         },
         submitNewTherapist() {
             authFetch(`https://hwg-backend.onrender.com/therapists`, {
@@ -1238,7 +1245,10 @@ export default {
                 <button class="btn btn-warning text-white" @click="markEventStatus('no-show')">❓ No-Show</button>
                 <button class="btn btn-outline-primary" @click="removeEventStatus">🔄 Clear</button>
                 <button class="btn btn-dark" @click="showEventModal = false">✖ Close</button>
-                <button class="btn btn-outline-danger" @click="deleteEvent">🗑️ Delete</button>
+                <button class="btn btn-outline-danger" @click="deleteEvent" :disabled="deletingEvent">
+                    <span v-if="deletingEvent" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    {{ deletingEvent ? 'Deleting...' : '🗑️ Delete' }}
+                </button>
             </div>
         </div>
     </div>
