@@ -1238,7 +1238,7 @@ export default {
                 <button class="btn btn-warning text-white" @click="markEventStatus('no-show')">❓ No-Show</button>
                 <button class="btn btn-outline-primary" @click="removeEventStatus">🔄 Clear</button>
                 <button class="btn btn-dark" @click="showEventModal = false">✖ Close</button>
-                <button v-if="isAdmin" class="btn btn-outline-danger" @click="deleteEvent">🗑️ Delete</button>
+                <button class="btn btn-outline-danger" @click="deleteEvent">🗑️ Delete</button>
             </div>
         </div>
     </div>
