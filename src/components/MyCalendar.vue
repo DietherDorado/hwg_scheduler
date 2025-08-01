@@ -174,11 +174,20 @@ export default {
         const router = useRouter();
         const storedUser = JSON.parse(localStorage.getItem('user'));
 
-        if (!storedUser) {
+        if (!storedUser || !localStorage.getItem('token')) {
             router.push('/');
             return;
         }
 
+        try {
+            const payload = JSON.parse(atob(localStorage.getItem('token').split('.')[1]));
+            const expiry = payload.exp * 1000; // Convert to milliseconds
+            if (Date.now() > expiry) throw new Error('Token expired');
+        } catch (err) {
+            localStorage.clear();
+            router.push('/');
+        }
+        
         this.user = storedUser;
         this.isAdmin = this.user.role === 'admin';
         if (!this.user.outOfOffice) {
@@ -552,6 +561,7 @@ export default {
         },
         logout() {
             localStorage.removeItem('user')
+            localStorage.removeItem('token')
             this.$router.push('/')
         },
         async deleteEvent() {
