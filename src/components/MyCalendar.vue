@@ -11,6 +11,8 @@ import { reactive, watch } from 'vue'
 import flatPickr from 'vue-flatpickr-component'
 import 'flatpickr/dist/flatpickr.css'
 import HorizontalTherapistWeekView from './HorizontalTherapistWeekView.vue'
+import Toastify from 'toastify-js'
+import "toastify-js/src/toastify.css"
 
 const authFetch = async (urlencoded, options = {}) => {
     const token = localStorage.getItem('token')
@@ -232,6 +234,16 @@ export default {
         document.removeEventListener('click', this.handleClickOutsideProfileDropdown);
     },
     methods: {
+        showToast(message, type = 'success') {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: type === 'success' ? "#28a745" : type === 'error' ? "#dc3545" : "#007bff",
+                stopOnFocus: true,
+            }).showToast();
+        },
         handleViewChange(arg) {
             localStorage.setItem('calendarView', arg.view.type);
         },
@@ -319,7 +331,7 @@ export default {
             const events = [];
 
             if (this.isTherapistOutOfOffice(therapistObj)) {
-                alert(`${therapistObj.name} is currently out of office and will return soon!`);
+                this.showToast(`${therapistObj.name} is currently out of office and will return soon!`, 'error');
                 return;
             }
 
@@ -385,7 +397,7 @@ export default {
             .then(() => this.closeModal())
                 .catch(err => {
                     console.error('Error submitting event:', err);
-                    alert('Failed to schedule session. Please try again.');
+                    this.showToast('Failed to schedule session. Please try again.', 'error');
             })
         },
         renderEventContent(arg) {
@@ -522,7 +534,7 @@ export default {
             const originalClient = this.selectedEvent.extendedProps.client || '';
 
             if (originalClient.includes(emoji) || originalClient.includes('❌') || originalClient.includes('❓')) {
-                alert(`This session is already marked as ${statusText}.`);
+                this.showToast(`This session is already marked as ${statusText}.`, 'error');
                 return;
             }
 
@@ -539,7 +551,7 @@ export default {
                 this.showEventModal = false;
             }).catch(err => {
                 console.error("Failed to update event status:", err);
-                alert(`Error marking session as ${statusText}. Please try again.`);
+                this.showToast(`Error marking session as ${statusText}. Please try again.`, 'error');
             })
         },
         removeEventStatus() {
@@ -552,7 +564,7 @@ export default {
                 .replace(/^❓\s*/, '');
 
             if (cleanClient === currentClient) {
-                alert("This session is not marked as cancelled or no-show.");
+                this.showToast("This session is not marked as cancelled or no-show.", 'error');
                 return;
             }
 
@@ -566,7 +578,7 @@ export default {
                 this.showEventModal = false;
             }).catch(err => {
                 console.error("Failed to clear event status:", err);
-                alert("Error clearing session status. Please try again.");
+                this.showToast("Error clearing session status. Please try again.", 'error');
             });
         },
         logout() {
@@ -596,7 +608,7 @@ export default {
                 await this.loadData();
             } catch (err) {
                 console.error('Failed to delete event:', err);
-                alert('Error deleting session. Please try again later.');
+                this.showToast('Error deleting session. Please try again later.', 'error');
             } finally {
                 this.deletingEvent = false;
             }
@@ -612,7 +624,7 @@ export default {
             .then(res => res.json())
                 .then(() => {
                     this.showAddTherapistModal = false;
-                    alert('New therapist added successfully!');
+                    this.showToast('New therapist added successfully!', 'success');
                 return authFetch('https://hwg-backend.onrender.com/therapists');
             })
             .then(res => res.json())
@@ -623,7 +635,7 @@ export default {
             })
             .catch(err => {
                 console.error('Failed to add new therapist:', err);
-                alert('Error adding new therapist. Please try again.');
+                this.showToast('Error adding new therapist. Please try again.', 'error');
             })
         },
         resetNewTherapistForm() {
@@ -665,7 +677,7 @@ export default {
                 body: JSON.stringify(this.selectedTherapistForEdit)
                 })
                 .then(() => {
-                    alert('Therapist updated successfully!');
+                    this.showToast('Therapist updated successfully!', 'success');
                     this.showEditTherapistModal = false;
                     return authFetch('https://hwg-backend.onrender.com/therapists');
                 })
@@ -684,7 +696,7 @@ export default {
                 method: 'DELETE'
             })
             .then(() => {
-                alert('Therapist deleted successfully!');
+                this.showToast('Therapist deleted successfully!', 'success');
                 this.showDeleteTherapistModal = false;
                 return authFetch('https://hwg-backend.onrender.com/therapists');
             })
@@ -748,7 +760,7 @@ export default {
         },
         async submitPasswordChange() {
             if (this.newPassword !== this.confirmPassword) {
-                alert("Passwords do not match.");
+                this.showToast("Passwords do not match.", 'error');
                 return;
             }
 
@@ -758,13 +770,13 @@ export default {
                     body: JSON.stringify({ newPassword: this.newPassword })
                 });
                 if (!res.ok) throw new Error('Failed to update password');
-                alert('Password updated successfully!');
+                this.showToast('Password updated successfully!', 'success');
                 this.newPassword = '';
                 this.confirmPassword = '';
                 this.showChangePasswordModal = false;
             } catch (err) {
                 console.error('Password update error:', err);
-                alert('Error updating password.');
+                this.showToast('Error updating password.', 'error');
             }
         },
         async submitAvailabilityChange() {
@@ -775,7 +787,7 @@ export default {
                 });
                 if (!res.ok) throw new Error('Failed to update availability');
 
-                alert('Availability updated successfully!');
+                this.showToast('Availability updated successfully!', 'success');
                 this.showChangeAvailabilityModal = false;
 
                 this.therapistMap[this.user.name] = { ...this.user };
@@ -785,7 +797,7 @@ export default {
                 calendarApi?.refetchEvents();
             } catch (err) {
                 console.error('Availability update error:', err);
-                alert('Error updating availability.');
+                this.showToast('Error updating availability.', 'error');
             }
         },
         async submitOutOfOffice() {
@@ -818,10 +830,10 @@ export default {
                 }
 
                 this.showOutOfOfficeModal = false;
-                alert('Out-of-office updated.');
+                this.showToast('Out-of-office updated.', 'success');
             } catch (err) {
                 console.error('Error updating out-of-office', err);
-                alert('Failed to update.');
+                this.showToast('Failed to update.', 'error');
             }
         },
         async loadData() {
@@ -874,7 +886,7 @@ export default {
                 this.$refs.fullCalendar?.getApi?.().refetchEvents();
             } catch (err) {
                 console.error('Error loading data:', err);
-                alert('Failed to load calendar data.');
+                this.showToast('Failed to load calendar data.', 'error');
             }
         },
         async submitEventEdit() {
@@ -906,7 +918,7 @@ export default {
                 await this.loadData(); // reload updated events
             } catch (err) {
                 console.error("Failed to update event:", err);
-                alert("Something went wrong while saving changes.");
+                this.showToast("Something went wrong while saving changes.", 'error');
             }
         },
         clearUserAvailability(day) {
