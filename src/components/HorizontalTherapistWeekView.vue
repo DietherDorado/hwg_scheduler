@@ -23,6 +23,7 @@
 import FullCalendar from '@fullcalendar/vue3'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
+import tippy from 'tippy.js'
 
 function formatTime(dateStr) {
   const date = new Date(dateStr);
@@ -57,12 +58,24 @@ export default {
             title: e.extendedProps?.client || 'Unknown Client',
             extendedProps: {
               ...e.extendedProps,
-              tooltip: `Client: ${e.extendedProps?.client || 'Unknown Client'}\nService: ${e.extendedProps?.service || 'Unknown Service'}\nRoom: ${e.extendedProps?.room || 'Unknown Room'}\nTime: ${formatTime(e.start)} - ${formatTime(e.end)}`
+              tooltip: `
+                <strong>Client:</strong> ${e.extendedProps?.client || 'Unknown'}<br/>
+                <strong>Service:</strong> ${e.extendedProps?.service || 'N/A'}<br/>
+                <strong>Room:</strong> ${e.extendedProps?.room || 'N/A'}<br/>
+                <strong>Time:</strong> ${formatTime(e.start)} – ${formatTime(e.end)}
+              `
             }
           })),
         eventDidMount(info) {
-            info.el.setAttribute('title', info.event.extendedProps.tooltip);
-          },
+            tippy(info.el, {
+            content: info.event.extendedProps.tooltip,
+            allowHTML: true,
+            theme: 'light', // optional theme
+            placement: 'top',
+            delay: [100, 0],
+            maxWidth: 250
+          });
+        },
         eventContent(arg) {
             return { html: `<div>${arg.event.title}</div>` };
           }
@@ -146,4 +159,12 @@ export default {
   line-height: 1.2;
   white-space: normal;
 }
+
+/* Add this to your global styles or <style scoped> */
+.tippy-box[data-theme~='light'] {
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 </style>
