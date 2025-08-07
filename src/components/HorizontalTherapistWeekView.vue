@@ -111,6 +111,18 @@ export default {
   border-radius: 4px;
 }
 
+.mini-calendar :deep(.fc-col-header-cell-cushion) {
+  font-size: 11px !important;
+  padding: 2px 4px !important;
+  font-weight: 600;
+  color: #3c3c3c;
+}
+
+.mini-calendar :deep(.fc-daygrid-day-number) {
+  font-size: 10px !important;
+}
+
+
 .mini-calendar :deep(.fc-scroller-liquid-absolute) {
   overflow-y: hidden !important;
 }
