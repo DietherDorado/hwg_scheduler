@@ -3,13 +3,18 @@
     <div
       v-for="therapist in therapists"
       :key="therapist.id"
+      :id="`therapist-${therapist.name}`"
       class="therapist-column"
     >
-      <h5 class="text-center">{{ therapist.name }}</h5>
-      <FullCalendar
-        class="mini-calendar"
-        :options="getCalendarOptions(therapist)"
-      />
+      <div class="therapist-wrapper">
+        <h5 class="therapist-name">{{ therapist.name }}</h5>
+        <div class="therapist-calendar-box">
+          <FullCalendar
+            class="mini-calendar"
+            :options="getCalendarOptions(therapist)"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -33,9 +38,9 @@ export default {
         headerToolbar: false,
         nowIndicator: true,
         allDaySlot: false,
-        slotMinTime: '07:00:00',
-        slotMaxTime: '21:00:00',
-        height: 400,
+        slotMinTime: '09:00:00',
+        slotMaxTime: '18:00:00',
+        height: 320,
         slotDuration: '00:30:00',
         slotLabelInterval: '01:00',
         slotLabelFormat: {
@@ -75,6 +80,10 @@ export default {
   padding: 2px 4px !important;
 }
 
+.mini-calendar :deep(.fc-scroller-liquid-absolute) {
+  overflow-y: hidden !important;
+}
+
 .therapist-column {
   min-width: 300px;
   max-width: 320px;
@@ -84,4 +93,25 @@ export default {
   background: #fff;
   padding: 0.5rem;
 }
+
+.therapist-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 320px;
+}
+
+.therapist-name {
+  margin-bottom: 0.5rem;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.therapist-calendar-box {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 0.3rem;
+  background: #fff;
+}
+
 </style>
