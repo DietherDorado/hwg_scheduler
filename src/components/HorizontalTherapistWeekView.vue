@@ -38,12 +38,12 @@ export default {
         headerToolbar: false,
         nowIndicator: true,
         allDaySlot: false,
-        slotMinTime: '08:00:00',
-        slotMaxTime: '18:00:00',
+        slotMinTime: '09:00:00',
+        slotMaxTime: '17:00:00',
         slotDuration: '00:30:00',
-        height: 320,
+        height: 280,
         events: this.allEvents
-          .filter(e => e.therapist === therapist.name)
+          .filter(e => (e.therapist || e.extendedProps?.therapist) === therapist.name)
           .map(e => ({
             ...e,
             display: 'block'
@@ -95,11 +95,23 @@ export default {
   font-size: 12px;
 }
 .mini-calendar :deep(.fc-timegrid-slot) {
-  padding: 2px 4px !important;
-  line-height: 1.1;
+  padding: 1px 2px !important;
+  line-height: 1 !important;
+  height: 1.3em !important;
 }
+
+.mini-calendar :deep(.fc-timegrid-slot-label) {
+  font-size: 10px !important;
+  padding: 0 2px !important;
+}
+
 .mini-calendar :deep(.fc-event) {
-  font-size: 11px !important;
-  padding: 2px 4px !important;
+  font-size: 10px !important;
+  padding: 1px 3px !important;
+  border-radius: 4px;
+}
+
+.mini-calendar :deep(.fc-scroller-liquid-absolute) {
+  overflow-y: hidden !important;
 }
 </style>
