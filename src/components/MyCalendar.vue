@@ -892,6 +892,13 @@ export default {
                     body: JSON.stringify(updated)
                 });
 
+                // Update local event appearance immediately
+                this.selectedEvent.setExtendedProp('client', updated.client);
+                this.selectedEvent.setExtendedProp('therapist', updated.therapist);
+                this.selectedEvent.setExtendedProp('service', updated.service);
+                this.selectedEvent.setExtendedProp('room', updated.room);
+                this.selectedEvent.setProp('backgroundColor', updated.backgroundColor);
+
                 this.showEventModal = false;
                 this.editMode = false;
                 await this.loadData(); // reload updated events
