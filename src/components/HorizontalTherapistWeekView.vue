@@ -125,7 +125,7 @@ export default {
 }
 
 .mini-calendar :deep(.fc-event-title) {
-  font-size: 11px;
+  font-size: 9px;
   padding: 0;
   line-height: 1.2;
   white-space: normal;
