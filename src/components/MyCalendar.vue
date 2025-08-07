@@ -10,6 +10,7 @@ import { formatDate } from '@fullcalendar/core/index.js'
 import { reactive, watch } from 'vue'
 import flatPickr from 'vue-flatpickr-component'
 import 'flatpickr/dist/flatpickr.css'
+import HorizontalTherapistWeekView from '.../HorizontalTherapistWeekView.vue'
 
 const authFetch = async (urlencoded, options = {}) => {
     const token = localStorage.getItem('token')
@@ -23,7 +24,7 @@ const authFetch = async (urlencoded, options = {}) => {
 
 export default {
     components: {
-        FullCalendar, flatPickr
+        FullCalendar, flatPickr, HorizontalTherapistWeekView
     },
     data() {
         const savedView = localStorage.getItem('calendarView') || (window.innerWidth < 768 ? 'listWeek' : 'timeGridWeek');
@@ -41,6 +42,7 @@ export default {
             showProfileDropdown: false,
             deletingEvent: false,
             selectedEvent: null,
+            isHorizontalView: false,
             selectedTherapist: savedTherapist,
             therapistMap: {},
             unavailableBackgrounds: [],
@@ -1060,6 +1062,19 @@ export default {
     </div>
 
 
+    <div class="d-flex justify-content-center gap-3 my-3">
+        <button
+            class="btn"
+            :class="isHorizontalView ? 'btn-outline-primary' : 'btn-primary'"
+            @click="isHorizontalView = false"
+        >📅 Default View</button>
+        <button
+            class="btn"
+            :class="isHorizontalView ? 'btn-primary' : 'btn-outline-primary'"
+            @click="isHorizontalView = true"
+        >🧑‍⚕️ Horizontal Therapist View</button>
+    </div>
+
     <div class="calendar-header d-flex justify-content-between align-items-center mb-3 px-3">
         <button @click="showModal = true" class="btn btn-primary">📝 Schedule Client</button>
         <!-- Profile Dropdown -->
@@ -1512,7 +1527,14 @@ export default {
     </div>
 
     <!-- FullCalendar component -->
-    <FullCalendar 
+     <HorizontalTherapistWeekView
+        v-if="isHorizontalView"
+        :therapists="filteredTherapists"
+        :allEvents="filteredEvents"
+    />
+
+    <FullCalendar
+        v-else
         ref="fullCalendar"
         :options="calendarOptions"
     />
