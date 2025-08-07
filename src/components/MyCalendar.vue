@@ -26,6 +26,7 @@ export default {
         FullCalendar, flatPickr
     },
     data() {
+        const savedView = localStorage.getItem('calendarView') || (window.innerWidth < 768 ? 'listWeek' : 'timeGridWeek');
         return {
             user: {
                 outOfOffice: {
@@ -133,7 +134,7 @@ export default {
                 height: 'auto',
                 themeSystem: 'bootstrap5',
                 plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, BootstrapTheme],
-                initialView: window.innerWidth < 768 ? 'listWeek' : 'timeGridWeek',
+                initialView: savedView,
                 views: {
                     timeGridWeek: {
                         slotMinTime: '07:00:00',
@@ -219,12 +220,17 @@ export default {
                 Sunday: []
             }
         }
+
+        this.calendarOptions.viewDidMount = this.handleViewChange;
     },
     beforeUnmount() {
         document.removeEventListener('click', this.handleClickOutsideDropdown);
         document.removeEventListener('click', this.handleClickOutsideProfileDropdown);
     },
     methods: {
+        handleViewChange(arg) {
+            localStorage.setItem('calendarView', arg.view.type);
+        },
         handleClickOutsideDropdown(e) {
             const dropdown = this.$refs.therapistDropdownRef;
             if (dropdown && !dropdown.contains(e.target)) {
