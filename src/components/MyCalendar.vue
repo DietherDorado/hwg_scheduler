@@ -42,7 +42,7 @@ export default {
             showProfileDropdown: false,
             deletingEvent: false,
             selectedEvent: null,
-            isHorizontalView: false,
+            isHorizontalView: localStorage.getItem('viewMode') === 'horizontal',
             selectedTherapist: savedTherapist,
             therapistMap: {},
             unavailableBackgrounds: [],
@@ -972,6 +972,10 @@ export default {
 
             let newIndex = (currentIndex + direction + this.therapistNames.length) % this.therapistNames.length;
             this.selectedTherapist = this.therapistNames[newIndex];
+        },
+        setViewMode(mode) {
+            this.isHorizontalView = mode === 'horizontal';
+            localStorage.setItem('viewMode', mode);
         }
     },
     computed: {
@@ -1066,12 +1070,12 @@ export default {
         <button
             class="btn"
             :class="isHorizontalView ? 'btn-outline-primary' : 'btn-primary'"
-            @click="isHorizontalView = false"
+            @click="setViewMode('default')"
         >📅 Default View</button>
         <button
             class="btn"
             :class="isHorizontalView ? 'btn-primary' : 'btn-outline-primary'"
-            @click="isHorizontalView = true"
+            @click="setViewMode('horizontal')"
         >💫 Horizontal View</button>
     </div>
 
@@ -1529,7 +1533,7 @@ export default {
     <!-- FullCalendar component -->
      <HorizontalTherapistWeekView
         v-if="isHorizontalView"
-        :therapists="therapists"
+        :therapists="therapists.filter(t => t.name !== 'Admin')"
         :allEvents="filteredEvents"
     />
 

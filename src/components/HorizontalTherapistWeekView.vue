@@ -1,7 +1,7 @@
 <template>
   <div class="horizontal-scroll-container">
     <div
-      v-for="therapist in therapists"
+      v-for="therapist in therapists.filter(t => t.name !== 'Admin')"
       :key="therapist.id"
       :id="`therapist-${therapist.name}`"
       class="therapist-column"
