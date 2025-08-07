@@ -1529,7 +1529,7 @@ export default {
     <!-- FullCalendar component -->
      <HorizontalTherapistWeekView
         v-if="isHorizontalView"
-        :therapists="filteredTherapists"
+        :therapists="therapists"
         :allEvents="filteredEvents"
     />
 
