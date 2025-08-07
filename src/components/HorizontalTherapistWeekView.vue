@@ -38,18 +38,12 @@ export default {
         headerToolbar: false,
         nowIndicator: true,
         allDaySlot: false,
-        slotMinTime: '09:00:00',
+        slotMinTime: '08:00:00',
         slotMaxTime: '18:00:00',
-        height: 320,
         slotDuration: '00:30:00',
-        slotLabelInterval: '01:00',
-        slotLabelFormat: {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: false
-        },
+        height: 320,
         events: this.allEvents
-          .filter(e => e.extendedProps?.therapist === therapist.name)
+          .filter(e => e.therapist === therapist.name)
           .map(e => ({
             ...e,
             display: 'block'
@@ -68,6 +62,35 @@ export default {
   padding: 1rem;
 }
 
+.therapist-column {
+  min-width: 300px;
+  max-width: 320px;
+  flex: 0 0 auto;
+}
+
+.therapist-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.therapist-name {
+  margin-bottom: 0.5rem;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  color: #333;
+}
+
+.therapist-calendar-box {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.3rem;
+}
+
+/* Mini calendar styling */
 .mini-calendar :deep(.fc) {
   font-size: 12px;
 }
@@ -79,39 +102,4 @@ export default {
   font-size: 11px !important;
   padding: 2px 4px !important;
 }
-
-.mini-calendar :deep(.fc-scroller-liquid-absolute) {
-  overflow-y: hidden !important;
-}
-
-.therapist-column {
-  min-width: 300px;
-  max-width: 320px;
-  flex: 0 0 auto;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background: #fff;
-  padding: 0.5rem;
-}
-
-.therapist-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 320px;
-}
-
-.therapist-name {
-  margin-bottom: 0.5rem;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.therapist-calendar-box {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 0.3rem;
-  background: #fff;
-}
-
 </style>
