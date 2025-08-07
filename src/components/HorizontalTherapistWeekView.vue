@@ -123,4 +123,11 @@ export default {
 .mini-calendar :deep(.fc-daygrid-day-number) {
   font-size: 10px !important;
 }
+
+.mini-calendar :deep(.fc-event-title) {
+  font-size: 11px;
+  padding: 0;
+  line-height: 1.2;
+  white-space: normal;
+}
 </style>
