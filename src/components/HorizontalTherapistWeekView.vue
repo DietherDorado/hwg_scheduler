@@ -24,6 +24,15 @@ import FullCalendar from '@fullcalendar/vue3'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 
+function formatTime(dateStr) {
+  const date = new Date(dateStr);
+  return date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+}
+
 export default {
   components: { FullCalendar },
   props: {
@@ -45,10 +54,20 @@ export default {
           .filter(e => e.extendedProps?.therapist === therapist.name)
           .map(e => ({
             ...e,
-            title: e.extendedProps?.client || 'Unknown Client'
+            title: e.extendedProps?.client || 'Unknown Client',
+            extendedProps: {
+              ...e.extendedProps,
+              tooltip: `Client: ${e.extendedProps?.client || 'Unknown Client'}\n
+                        Service: ${e.extendedProps?.service || 'Unknown Service'}\n
+                        Room: ${e.extendedProps?.room || 'Unknown Room'}\n
+                        Time: ${formatTime(e.start)} - ${formatTime(e.end)}`
+            }
           })),
+        eventDidMount(info) {
+            info.el.setAttribute('title', info.event.extendedProps.tooltip);
+          },
         eventContent(arg) {
-            return { html: `<div class="fc-event-title">${arg.event.title}</div>` };
+            return { html: `<div>${arg.event.title}</div>` };
           }
       }
     }
