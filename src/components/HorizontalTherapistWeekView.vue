@@ -31,9 +31,18 @@ export default {
         plugins: [timeGridPlugin, interactionPlugin],
         initialView: 'timeGridWeek',
         headerToolbar: false,
-        height: 'auto',
+        nowIndicator: true,
+        allDaySlot: false,
         slotMinTime: '07:00:00',
         slotMaxTime: '21:00:00',
+        height: 400,
+        slotDuration: '00:30:00',
+        slotLabelInterval: '01:00',
+        slotLabelFormat: {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: false
+        },
         events: this.allEvents
           .filter(e => e.extendedProps?.therapist === therapist.name)
           .map(e => ({
@@ -53,8 +62,22 @@ export default {
   gap: 20px;
   padding: 1rem;
 }
+
+.mini-calendar :deep(.fc) {
+  font-size: 12px;
+}
+.mini-calendar :deep(.fc-timegrid-slot) {
+  padding: 2px 4px !important;
+  line-height: 1.1;
+}
+.mini-calendar :deep(.fc-event) {
+  font-size: 11px !important;
+  padding: 2px 4px !important;
+}
+
 .therapist-column {
-  min-width: 320px;
+  min-width: 300px;
+  max-width: 320px;
   flex: 0 0 auto;
   border: 1px solid #ccc;
   border-radius: 10px;
