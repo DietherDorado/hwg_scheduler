@@ -1072,7 +1072,7 @@ export default {
             class="btn"
             :class="isHorizontalView ? 'btn-primary' : 'btn-outline-primary'"
             @click="isHorizontalView = true"
-        >🧑‍⚕️ Horizontal Therapist View</button>
+        >💫 Horizontal View</button>
     </div>
 
     <div class="calendar-header d-flex justify-content-between align-items-center mb-3 px-3">
