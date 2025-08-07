@@ -10,7 +10,7 @@ import { formatDate } from '@fullcalendar/core/index.js'
 import { reactive, watch } from 'vue'
 import flatPickr from 'vue-flatpickr-component'
 import 'flatpickr/dist/flatpickr.css'
-import HorizontalTherapistWeekView from '.../HorizontalTherapistWeekView.vue'
+import HorizontalTherapistWeekView from './HorizontalTherapistWeekView.vue'
 
 const authFetch = async (urlencoded, options = {}) => {
     const token = localStorage.getItem('token')
