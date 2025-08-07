@@ -57,10 +57,7 @@ export default {
             title: e.extendedProps?.client || 'Unknown Client',
             extendedProps: {
               ...e.extendedProps,
-              tooltip: `Client: ${e.extendedProps?.client || 'Unknown Client'}\n
-                        Service: ${e.extendedProps?.service || 'Unknown Service'}\n
-                        Room: ${e.extendedProps?.room || 'Unknown Room'}\n
-                        Time: ${formatTime(e.start)} - ${formatTime(e.end)}`
+              tooltip: `Client: ${e.extendedProps?.client || 'Unknown Client'}\nService: ${e.extendedProps?.service || 'Unknown Service'}\nRoom: ${e.extendedProps?.room || 'Unknown Room'}\nTime: ${formatTime(e.start)} - ${formatTime(e.end)}`
             }
           })),
         eventDidMount(info) {
