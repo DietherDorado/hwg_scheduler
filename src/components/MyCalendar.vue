@@ -362,6 +362,8 @@ export default {
                 });
         }
 
+            this.showToast('Session created successfully!', 'success');
+            
             // Submit each event to backend
             Promise.all(events.map(event =>
                 authFetch('https://hwg-backend.onrender.com/events', {
