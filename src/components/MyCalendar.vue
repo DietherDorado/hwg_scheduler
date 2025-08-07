@@ -363,7 +363,7 @@ export default {
         }
 
             this.showToast('Session created successfully!', 'success');
-            
+
             // Submit each event to backend
             Promise.all(events.map(event =>
                 authFetch('https://hwg-backend.onrender.com/events', {
@@ -614,6 +614,8 @@ export default {
             } finally {
                 this.deletingEvent = false;
             }
+
+            this.showToast('Sessions has been deleted.', 'success');
         },
         submitNewTherapist() {
             authFetch(`https://hwg-backend.onrender.com/therapists`, {
