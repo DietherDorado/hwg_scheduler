@@ -46,7 +46,7 @@ export default {
           .filter(e => (e.therapist || e.extendedProps?.therapist) === therapist.name)
           .map(e => ({
             ...e,
-            display: 'block'
+            title: e.extendedProps?.client || 'Unknown Client'
           }))
       }
     }
