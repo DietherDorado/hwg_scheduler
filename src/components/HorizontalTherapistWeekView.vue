@@ -36,18 +36,20 @@ export default {
         plugins: [timeGridPlugin, interactionPlugin],
         initialView: 'timeGridWeek',
         headerToolbar: false,
-        nowIndicator: true,
         allDaySlot: false,
         slotMinTime: '07:00:00',
         slotMaxTime: '21:00:00',
         slotDuration: '00:30:00',
         height: 280,
         events: this.allEvents
-          .filter(e => (e.therapist || e.extendedProps?.therapist) === therapist.name)
+          .filter(e => e.extendedProps?.therapist === therapist.name)
           .map(e => ({
             ...e,
             title: e.extendedProps?.client || 'Unknown Client'
-          }))
+          })),
+        eventContent(arg) {
+            return { html: `<div class="fc-event-title">${arg.event.title}</div>` };
+          }
       }
     }
   }
