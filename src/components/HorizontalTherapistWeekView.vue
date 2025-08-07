@@ -38,8 +38,8 @@ export default {
         headerToolbar: false,
         nowIndicator: true,
         allDaySlot: false,
-        slotMinTime: '09:00:00',
-        slotMaxTime: '17:00:00',
+        slotMinTime: '07:00:00',
+        slotMaxTime: '21:00:00',
         slotDuration: '00:30:00',
         height: 280,
         events: this.allEvents
