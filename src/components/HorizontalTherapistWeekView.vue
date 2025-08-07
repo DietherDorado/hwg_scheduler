@@ -121,9 +121,4 @@ export default {
 .mini-calendar :deep(.fc-daygrid-day-number) {
   font-size: 10px !important;
 }
-
-
-.mini-calendar :deep(.fc-scroller-liquid-absolute) {
-  overflow-y: hidden !important;
-}
 </style>
