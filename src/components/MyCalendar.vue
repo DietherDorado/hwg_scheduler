@@ -27,6 +27,7 @@ export default {
     },
     data() {
         const savedView = localStorage.getItem('calendarView') || (window.innerWidth < 768 ? 'listWeek' : 'timeGridWeek');
+        const savedTherapist = localStorage.getItem('selectedTherapist') || 'All';
         return {
             user: {
                 outOfOffice: {
@@ -40,7 +41,7 @@ export default {
             showProfileDropdown: false,
             deletingEvent: false,
             selectedEvent: null,
-            selectedTherapist: 'All',
+            selectedTherapist: savedTherapist,
             therapistMap: {},
             unavailableBackgrounds: [],
             gifsByDay: [
@@ -135,6 +136,7 @@ export default {
                 themeSystem: 'bootstrap5',
                 plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, BootstrapTheme],
                 initialView: savedView,
+                viewDidMount: this.handleViewChange,
                 views: {
                     timeGridWeek: {
                         slotMinTime: '07:00:00',
@@ -1003,9 +1005,10 @@ export default {
         }
     },
     watch: {
-        selectedTherapist() {
+        selectedTherapist(newValue) {
+            localStorage.setItem('selectedTherapist', newValue);
             const calendarApi = this.$refs.fullCalendar?.getApi?.();
-            calendarApi.refetchEvents();
+            calendarApi?.refetchEvents();
         },
 
         'form.start': function (newStart) {
