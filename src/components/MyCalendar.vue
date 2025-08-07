@@ -425,7 +425,6 @@ export default {
                 wrapper.innerHTML = `
                 <strong>‣ ${client || 'Client'}</strong><br/>
                 <small>👩‍⚕️ ${therapist || ''}</small><br/>
-                <small>🕒 ${startStr} – ${endStr}</small>
                 `;
                 return { domNodes: [wrapper] };
             }
@@ -435,7 +434,6 @@ export default {
                 html: `
                 <div style="font-size: 13px;">
                     👤 ${client || 'Client'}<br/>
-                    🕒 ${startStr} – ${endStr}<br/>
                     🛋 ${room || ''}<br/>
                     👩‍⚕️ ${therapist || ''}
                 </div>
