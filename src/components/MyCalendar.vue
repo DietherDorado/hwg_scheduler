@@ -541,7 +541,7 @@ export default {
         events.push({
           start: currentStart.toISOString(),
           end: currentEnd.toISOString(),
-          backgroundColor: roomColor,
+          style: { background: roomColor },
           extendedProps: {
             therapist: this.form.therapist,
             client: this.form.client,
@@ -612,7 +612,7 @@ export default {
         this.selectedEvent.setExtendedProp('therapist', updated.therapist)
         this.selectedEvent.setExtendedProp('service', updated.service)
         this.selectedEvent.setExtendedProp('room', updated.room)
-        this.selectedEvent.setProp('backgroundColor', updated.backgroundColor)
+        this.selectedEvent.setProp('style', { background: updated.backgroundColor })
 
         this.showEventModal = false
         this.editMode = false
