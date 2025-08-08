@@ -194,7 +194,7 @@ export default {
             localStorage.clear();
             router.push('/');
         }
-        
+
         this.user = storedUser;
         this.isAdmin = this.user.role === 'admin';
         if (!this.user.outOfOffice) {
@@ -744,7 +744,7 @@ export default {
             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
             for (const day of days) {
                 const blocks = this.user.availability[day];
-                
+
                 if (!Array.isArray(blocks) || blocks.length === 0) {
                 // Default to 9–17 if nothing set
                 this.user.availability[day] = [{ start: '09:00', end: '17:00' }];
@@ -866,7 +866,7 @@ export default {
                         therapist: event.therapist_name
                     }
                 }));
-                
+
                 // Update Calendar's eventSources
                 this.calendarOptions.eventSources = [
                     {
@@ -1050,516 +1050,781 @@ export default {
 </script>
 
 <template>
-    <div class="bg-light p-4 rounded shadow-sm mb-4 text-center">
-        <h1 class="display-4 text-primary fw-bold my-4 d-flex justify-content-center align-items-center gap-3">
-            <img src="/hwg.svg" alt="HWG Logo" class="logo-spin" style="width: 50px; height: 50px;" />
-            HWG Scheduler <small v-if="user" class="ms-3 fs-5 text-muted">– Welcome, {{ user.name }}</small>
-        </h1>
-        <p class="lead text-center text-muted">Easily manage therapist schedules and client sessions</p>
-        <img :src="dailyGif" alt="Daily GIF" style="width: 200px;" />
-    </div>
+  <div class="bg-light p-4 rounded shadow-sm mb-4 text-center">
+    <h1
+      class="display-4 text-primary fw-bold my-4 d-flex justify-content-center align-items-center gap-3"
+    >
+      <img
+        src="/hwg.svg"
+        alt="HWG Logo"
+        class="logo-spin"
+        style="width: 50px; height: 50px"
+      />
+      HWG Scheduler
+      <small v-if="user" class="ms-3 fs-5 text-muted"
+        >– Welcome, {{ user.name }}</small
+      >
+    </h1>
+    <p class="lead text-center text-muted">
+      Easily manage therapist schedules and client sessions
+    </p>
+    <img :src="dailyGif" alt="Daily GIF" style="width: 200px" />
+  </div>
 
-    <div v-if="isAdmin" class="admin-banner">
-        <span>👑 You are logged in as <strong>Admin</strong></span>
-    </div>
+  <div v-if="isAdmin" class="admin-banner">
+    <span>👑 You are logged in as <strong>Admin</strong></span>
+  </div>
 
-    <div v-if="isAdmin" class="dropdown" ref="therapistDropdownRef" style="position: relative; display: inline-block;">
-        <button class="btn btn-success" @click="toggleTherapistDropdown">
-            ⚙️ Manage Therapists
+  <div
+    v-if="isAdmin"
+    class="dropdown"
+    ref="therapistDropdownRef"
+    style="position: relative; display: inline-block"
+  >
+    <button class="btn btn-success" @click="toggleTherapistDropdown">
+      ⚙️ Manage Therapists
+    </button>
+    <div v-if="showTherapistDropdown" class="dropdown-menu show">
+      <button class="dropdown-item" @click="openAddTherapistModal">
+        ➕ Add Therapist
+      </button>
+      <button class="dropdown-item" @click="openEditTherapistModal">
+        ✏️ Edit Therapists
+      </button>
+      <button class="dropdown-item" @click="openDeleteTherapistModal">
+        🗑️ Delete Therapists
+      </button>
+    </div>
+  </div>
+
+  <div v-if="user && user.outOfOffice && user.outOfOffice.start">
+    <strong>Out of Office:</strong><br />
+    {{ formatDate(user.outOfOffice.start) }} -
+    {{ formatDate(user.outOfOffice.end) }}
+  </div>
+
+  <div class="d-flex justify-content-center gap-3 my-3">
+    <button
+      class="btn"
+      :class="isHorizontalView ? 'btn-outline-primary' : 'btn-primary'"
+      @click="setViewMode('default')"
+    >
+      📅 Default View
+    </button>
+    <button
+      class="btn"
+      :class="isHorizontalView ? 'btn-primary' : 'btn-outline-primary'"
+      @click="setViewMode('horizontal')"
+    >
+      💫 Scheduler View
+    </button>
+  </div>
+
+  <div
+    class="calendar-header d-flex justify-content-between align-items-center mb-3 px-3"
+  >
+    <button @click="showModal = true" class="btn btn-primary">
+      📝 Schedule Client
+    </button>
+    <!-- Profile Dropdown -->
+    <div class="dropdown position-relative">
+      <!-- Profile image -->
+      <img
+        ref="profileImage"
+        src="https://i.imgur.com/4LJltFq.png"
+        alt="Profile"
+        class="rounded-circle"
+        style="width: 60px; height: 60px; cursor: pointer; object-fit: cover"
+        @click="toggleProfileDropdown"
+      />
+
+      <!-- Dropdown menu -->
+      <div
+        v-if="showProfileDropdown"
+        ref="profileDropdown"
+        class="dropdown-menu show mt-2"
+        style="right: 0; left: auto; position: absolute"
+      >
+        <button class="dropdown-item" @click="showOutOfOfficeModal = true">
+          🚪 Set Out-of-Office Dates
         </button>
-        <div v-if="showTherapistDropdown" class="dropdown-menu show">
-            <button class="dropdown-item" @click="openAddTherapistModal">➕ Add Therapist</button>
-            <button class="dropdown-item" @click="openEditTherapistModal">✏️ Edit Therapists</button>
-            <button class="dropdown-item" @click="openDeleteTherapistModal">🗑️ Delete Therapists</button>
+        <button class="dropdown-item" @click="handleChangePassword">
+          🔒 Change Password
+        </button>
+        <button class="dropdown-item" @click="handleChangeAvailability">
+          🗓️ Change Availability
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item text-danger" @click="logout">
+          🚪 Logout
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="therapist-filter" style="margin: 1rem 0">
+    <label for="therapistDropdown">Filter by Therapist:</label>
+    <select v-model="selectedTherapist" id="therapistDropdown">
+      <option value="All">All Therapists</option>
+      <option
+        v-for="therapist in therapists"
+        :key="therapist.id"
+        :value="therapist.name"
+        :disabled="isTherapistOutOfOffice(therapist)"
+      >
+        {{ therapist.name }}
+        <span v-if="isTherapistOutOfOffice(therapist)">🚫</span>
+      </option>
+    </select>
+  </div>
+
+  <div class="d-flex align-items-center justify-content-center gap-3 mt-2">
+    <button
+      class="btn btn-outline-secondary btn-sm"
+      @click="cycleTherapist(-1)"
+      title="Previous Therapist"
+    >
+      ◀
+    </button>
+    <p class="mb-0"><strong>Now Viewing:</strong> {{ selectedTherapist }}</p>
+    <button
+      class="btn btn-outline-secondary btn-sm"
+      @click="cycleTherapist(1)"
+      title="Next Therapist"
+    >
+      ▶
+    </button>
+  </div>
+
+  <!-- Schedule Client Modal -->
+  <div v-if="showModal" class="modal-overlay">
+    <div class="modal-content">
+      <form @submit.prevent="submitEvent">
+        <h2>📅 Schedule A Client</h2>
+
+        <div class="modal-section text-center">
+          <label class="form-label">Client Name</label>
+          <input
+            v-model="form.client"
+            type="text"
+            class="form-control"
+            placeholder="Enter client name"
+            required
+          />
         </div>
-    </div>
 
-    <div v-if="user && user.outOfOffice && user.outOfOffice.start">
-        <strong>Out of Office:</strong><br />
-        {{ formatDate(user.outOfOffice.start) }} - {{ formatDate(user.outOfOffice.end) }}
-    </div>
-
-
-    <div class="d-flex justify-content-center gap-3 my-3">
-        <button
-            class="btn"
-            :class="isHorizontalView ? 'btn-outline-primary' : 'btn-primary'"
-            @click="setViewMode('default')"
-        >📅 Default View</button>
-        <button
-            class="btn"
-            :class="isHorizontalView ? 'btn-primary' : 'btn-outline-primary'"
-            @click="setViewMode('horizontal')"
-        >💫 Scheduler View</button>
-    </div>
-
-    <div class="calendar-header d-flex justify-content-between align-items-center mb-3 px-3">
-        <button @click="showModal = true" class="btn btn-primary">📝 Schedule Client</button>
-        <!-- Profile Dropdown -->
-        <div class="dropdown position-relative">
-            <!-- Profile image -->
-            <img
-            ref="profileImage"
-            src="https://i.imgur.com/4LJltFq.png"
-            alt="Profile"
-            class="rounded-circle"
-            style="width: 60px; height: 60px; cursor: pointer; object-fit: cover;"
-            @click="toggleProfileDropdown"
-            />
-
-            <!-- Dropdown menu -->
-            <div
-            v-if="showProfileDropdown"
-            ref="profileDropdown"
-            class="dropdown-menu show mt-2"
-            style="right: 0; left: auto; position: absolute;"
-            >
-            <button class="dropdown-item" @click="showOutOfOfficeModal = true">🚪 Set Out-of-Office Dates</button>
-            <button class="dropdown-item" @click="handleChangePassword">🔒 Change Password</button>
-            <button class="dropdown-item" @click="handleChangeAvailability">🗓️ Change Availability</button>
-            <div class="dropdown-divider"></div>
-                <button class="dropdown-item text-danger" @click="logout">🚪 Logout</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="therapist-filter" style="margin: 1rem 0;">
-        <label for="therapistDropdown">Filter by Therapist:</label>
-        <select v-model="selectedTherapist" id="therapistDropdown">
-            <option value="All">All Therapists</option>
-            <option 
-                v-for="therapist in therapists" 
-                :key="therapist.id" 
+        <div class="modal-section text-center">
+          <!-- Select Therapist -->
+          <div class="form-group mb-3 d-flex flex-column align-items-center">
+            <label class="form-label">Therapist</label>
+            <select v-model="form.therapist" class="form-select w-75" required>
+              <option disabled value="">Select a therapist</option>
+              <option
+                v-for="therapist in therapists"
+                :key="therapist.id"
                 :value="therapist.name"
                 :disabled="isTherapistOutOfOffice(therapist)"
-            >
+              >
                 {{ therapist.name }}
                 <span v-if="isTherapistOutOfOffice(therapist)">🚫</span>
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group mb-3 d-flex flex-column align-items-center">
+            <label class="form-label">Service</label>
+            <select v-model="form.service" class="form-select w-75" required>
+              <option disabled value="">Select a service</option>
+              <option
+                v-for="service in services"
+                :key="service"
+                :value="service"
+              >
+                {{ service }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group mb-3 d-flex flex-column align-items-center">
+          <label class="form-label">Room</label>
+          <select
+            v-model="form.room"
+            class="form-select w-75 text-center"
+            required
+          >
+            <option disabled value="">Select a room</option>
+            <option v-for="(color, name) in rooms" :key="name" :value="name">
+              {{ name }}
             </option>
+          </select>
+        </div>
+
+        <div class="form-group mb-3 d-flex flex-column align-items-center">
+          <label class="form-label">Start Time</label>
+          <flat-pickr
+            class="form-control mb-2"
+            v-model="form.start"
+            :config="flatpickrConfig"
+            placeholder="Select start time"
+          />
+          <label class="form-label">End Time</label>
+          <flat-pickr
+            class="form-control mb-2"
+            v-model="form.end"
+            :config="flatpickrConfig"
+            placeholder="Select end time"
+            :readonly="form.service !== 'Out-Of-Office'"
+          />
+        </div>
+
+        <div class="modal-section">
+          <label class="form-label">Frequency</label>
+          <select v-model="form.frequency" class="form-select">
+            <option value="none">Doesn't repeat</option>
+            <option value="daily">Every day</option>
+            <option value="weekly">Every week</option>
+            <option value="monthly">Every month</option>
+          </select>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <button type="submit" class="btn btn-primary w-50 me-2">
+            ✅ Submit
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary w-50"
+            @click="closeModal"
+          >
+            ❌ Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Event Details Modal -->
+  <div
+    v-if="showEventModal"
+    class="modal-overlay"
+    @click.self="showEventModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 500px; max-width: 95%"
+    >
+      <h3 class="text-center text-primary fw-bold mb-4">
+        {{  editMode ? 'Edit Session 🛠️' : 'Session Details ✍️' }}
+      </h3>
+
+      <!-- Editable View -->
+      <div v-if="editMode">
+        <label>Client</label>
+        <input class="form-control mb-2" v-model="editForm.client" />
+
+        <label>Therapist</label>
+        <select class="form-control mb-2" v-model="editForm.therapist">
+          <option v-for="t in therapists" :key="t.id" :value="t.name">
+            {{  t.name }}
+          </option>
         </select>
-    </div>
 
-    <div class="d-flex align-items-center justify-content-center gap-3 mt-2">
-        <button class="btn btn-outline-secondary btn-sm" @click="cycleTherapist(-1)" title="Previous Therapist">
-            ◀
-        </button>
-        <p class="mb-0"><strong>Now Viewing:</strong> {{ selectedTherapist }}</p>
-        <button class="btn btn-outline-secondary btn-sm" @click="cycleTherapist(1)" title="Next Therapist">
-            ▶
-        </button>
-    </div>
+        <label>Service</label>
+        <select class="form-control mb-2" v-model="editForm.service">
+          <option v-for="s in services" :key="s" :value="s">{{  s  }}</option>
+        </select>
 
+        <label>Room</label>
+        <select class="form-control mb-2" v-model="editForm.room">
+          <option v-for="(color, name) in rooms" :key="name" :value="name">
+            {{  name }}
+          </option>
+        </select>
 
-    <!-- Schedule Client Modal -->
-    <div v-if="showModal" class="modal-overlay">
-        <div class="modal-content">
-            <form @submit.prevent="submitEvent">
-                <h2>📅 Schedule A Client</h2>
-                
-                <div class="modal-section text-center">
-                    <label class="form-label">Client Name</label>
-                    <input v-model="form.client" type="text" class="form-control" placeholder="Enter client name" required />
-                </div>
+        <label>Start Time</label>
+        <flat-pickr
+          class="form-control mb-2"
+          v-model="editForm.start"
+          :config="flatpickrConfig"
+        />
 
-                <div class="modal-section text-center">
-                    <!-- Select Therapist -->
-                    <div class="form-group mb-3 d-flex flex-column align-items-center">
-                    <label class="form-label">Therapist</label>
-                    <select v-model="form.therapist" class="form-select w-75" required>
-                        <option disabled value="">Select a therapist</option>
-                        <option 
-                            v-for="therapist in therapists" 
-                            :key="therapist.id" 
-                            :value="therapist.name"
-                            :disabled="isTherapistOutOfOffice(therapist)"
-                        >
-                            {{ therapist.name }}
-                            <span v-if="isTherapistOutOfOffice(therapist)">🚫</span>
-                        </option>
-                    </select>
-                </div>
+        <label>End Time</label>
+        <flat-pickr
+          class="form-control mb-2"
+          v-model="editForm.end"
+          :config="flatpickrConfig"
+        />
 
-                <div class="form-group mb-3 d-flex flex-column align-items-center">
-                    <label class="form-label">Service</label>
-                    <select v-model="form.service" class="form-select w-75" required>
-                        <option disabled value="">Select a service</option>
-                        <option v-for="service in services" :key="service" :value="service">{{ service }}</option>
-                    </select>
-                    </div>
-                </div>
-
-                <div class="form-group mb-3 d-flex flex-column align-items-center">
-                    <label class="form-label">Room</label>
-                    <select v-model="form.room" class="form-select w-75 text-center" required>
-                    <option disabled value="">Select a room</option>
-                    <option v-for="(color, name) in rooms" :key="name" :value="name">
-                        {{ name }}
-                    </option>
-                    </select>
-                </div>
-
-                <div class="form-group mb-3 d-flex flex-column align-items-center">
-                        <label class="form-label">Start Time</label>
-                        <flat-pickr
-                            class="form-control mb-2"
-                            v-model="form.start"
-                            :config="flatpickrConfig"
-                            placeholder="Select start time"
-                        />
-                        <label class="form-label">End Time</label>
-                        <flat-pickr
-                            class="form-control mb-2"
-                            v-model="form.end"
-                            :config="flatpickrConfig"
-                            placeholder="Select end time"
-                            :readonly="form.service !== 'Out-Of-Office'"
-                        />
-                </div>
-
-                <div class="modal-section">
-                    <label class="form-label">Frequency</label>
-                    <select v-model="form.frequency" class="form-select">
-                    <option value="none">Doesn't repeat</option>
-                    <option value="daily">Every day</option>
-                    <option value="weekly">Every week</option>
-                    <option value="monthly">Every month</option>
-                    </select>
-                </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <button type="submit" class="btn btn-primary w-50 me-2">✅ Submit</button>
-                    <button type="button" class="btn btn-outline-secondary w-50" @click="closeModal">❌ Cancel</button>
-                </div>
-            </form>
-
+        <div class="d-flex justify-content-between">
+          <button class="btn btn-success w-50 me-2" @click="submitEventEdit">
+            💾 Save
+          </button>
+          <button class="btn btn-secondary w-50" @click="editMode = false">
+            Cancel
+          </button>
         </div>
-    </div>
+      </div>
 
-    <!-- Event Details Modal -->
-    <div v-if="showEventModal" class="modal-overlay" @click.self="showEventModal = false">
-        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 500px; max-width: 95%;">
-            <h3 class="text-center text-primary fw-bold mb-4">
-                {{  editMode ? 'Edit Session 🛠️' : 'Session Details ✍️' }}
-            </h3>
-            
-            <!-- Editable View -->
-             <div v-if="editMode">
-                <label>Client</label>
-                <input class="form-control mb-2" v-model="editForm.client" />
+      <!-- 🔒 Read-Only View -->
+      <div v-else>
+        <ul class="list-unstyled text-start mb-4" style="line-height: 1.8">
+          <li>
+            <strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}
+          </li>
+          <li>
+            <strong>Therapist:</strong>
+            {{ selectedEvent?.extendedProps?.therapist }}
+          </li>
+          <li>
+            <strong>Service:</strong>
+            {{ selectedEvent?.extendedProps?.service }}
+          </li>
+          <li>
+            <strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}
+          </li>
 
-                <label>Therapist</label>
-                <select class="form-control mb-2" v-model="editForm.therapist">
-                    <option v-for="t in therapists" :key="t.id" :value="t.name">{{  t.name }}</option>
-                </select>
+          <li>
+            <strong>Time:</strong>
+            {{ new Date(selectedEvent?.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+            -
+            {{ new Date(selectedEvent?.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+          </li>
+        </ul>
 
-                <label>Service</label>
-                <select class="form-control mb-2" v-model="editForm.service">
-                    <option v-for="s in services" :key="s" :value="s">{{  s  }}</option>
-                </select>
-
-                <label>Room</label>
-                <select class="form-control mb-2" v-model="editForm.room">
-                    <option v-for="(color, name) in rooms" :key="name" :value="name">{{  name }}</option>
-                </select>
-
-                <label>Start Time</label>
-                    <flat-pickr
-                    class="form-control mb-2"
-                    v-model="editForm.start"
-                    :config="flatpickrConfig"
-                    />
-
-                <label>End Time</label>
-                    <flat-pickr
-                    class="form-control mb-2"
-                    v-model="editForm.end"
-                    :config="flatpickrConfig"
-                    />
-
-                <div class="d-flex justify-content-between">
-                    <button class="btn btn-success w-50 me-2" @click="submitEventEdit">💾 Save</button>
-                    <button class="btn btn-secondary w-50" @click="editMode = false">Cancel</button>
-                </div>
-             </div>
-
-            <!-- 🔒 Read-Only View -->
-            <div v-else>
-                <ul class="list-unstyled text-start mb-4" style="line-height: 1.8;">
-                    <li><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</li>
-                    <li><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</li>
-                    <li><strong>Service:</strong> {{ selectedEvent?.extendedProps?.service }}</li>
-                    <li><strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}</li>
-
-                    <li>
-                    <strong>Time:</strong>
-                    {{ new Date(selectedEvent?.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-                    -
-                    {{ new Date(selectedEvent?.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-                    </li>
-                </ul>
-
-            <div class="d-flex flex-wrap justify-content-center gap-2">
-                <button class="btn btn-outline-secondary" @click="editMode = true">✏️ Edit</button>
-                <button class="btn btn-danger" @click="markEventStatus('cancelled')">❌ Cancelled</button>
-                <button class="btn btn-warning text-white" @click="markEventStatus('no-show')">❓ No-Show</button>
-                <button class="btn btn-outline-primary" @click="removeEventStatus">🔄 Clear</button>
-                <button class="btn btn-dark" @click="showEventModal = false">✖ Close</button>
-                <button class="btn btn-outline-danger" @click="deleteEvent" :disabled="deletingEvent">
-                    <span v-if="deletingEvent" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    {{ deletingEvent ? 'Deleting...' : '🗑️ Delete' }}
-                </button>
-            </div>
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+          <button class="btn btn-outline-secondary" @click="editMode = true">
+            ✏️ Edit
+          </button>
+          <button class="btn btn-danger" @click="markEventStatus('cancelled')">
+            ❌ Cancelled
+          </button>
+          <button
+            class="btn btn-warning text-white"
+            @click="markEventStatus('no-show')"
+          >
+            ❓ No-Show
+          </button>
+          <button class="btn btn-outline-primary" @click="removeEventStatus">
+            🔄 Clear
+          </button>
+          <button class="btn btn-dark" @click="showEventModal = false">
+            ✖ Close
+          </button>
+          <button
+            class="btn btn-outline-danger"
+            @click="deleteEvent"
+            :disabled="deletingEvent"
+          >
+            <span
+              v-if="deletingEvent"
+              class="spinner-border spinner-border-sm me-2"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            {{ deletingEvent ? 'Deleting...' : '🗑️ Delete' }}
+          </button>
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
+  <!-- Add New Therapist Modal -->
+  <div
+    v-if="showAddTherapistModal"
+    class="modal-overlay"
+    @click.self="showAddTherapistModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 400px; max-width: 90%"
+    >
+      <h3 class="text-center mb-4 text-success fw-bold">Add New Therapist</h3>
 
+      <form @submit.prevent="submitNewTherapist">
+        <div class="mb-3">
+          <label class="form-label">Full Name</label>
+          <input
+            v-model="newTherapist.name"
+            type="text"
+            class="form-control"
+            placeholder="Enter full name"
+            required
+          />
+        </div>
 
-    <!-- Add New Therapist Modal -->
-    <div v-if="showAddTherapistModal" class="modal-overlay" @click.self="showAddTherapistModal = false">
-        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%;">
-            <h3 class="text-center mb-4 text-success fw-bold">Add New Therapist</h3>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input
+            v-model="newTherapist.email"
+            type="email"
+            class="form-control"
+            placeholder="Enter email"
+            required
+          />
+        </div>
 
-            <form @submit.prevent="submitNewTherapist">
-            <div class="mb-3">
-                <label class="form-label">Full Name</label>
-                <input v-model="newTherapist.name" type="text" class="form-control" placeholder="Enter full name" required />
-            </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input
+            v-model="newTherapist.password"
+            type="password"
+            class="form-control"
+            placeholder="Enter password"
+            required
+          />
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input v-model="newTherapist.email" type="email" class="form-control" placeholder="Enter email" required />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input v-model="newTherapist.password" type="password" class="form-control" placeholder="Enter password" required />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Role</label>
-                <select v-model="newTherapist.role" class="form-select">
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-                </select>
-            </div>
+        <div class="mb-3">
+          <label class="form-label">Role</label>
+          <select v-model="newTherapist.role" class="form-select">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
 
         <!-- Optional future: Add availability picker -->
 
         <div class="d-flex justify-content-between mt-4">
-            <button class="btn btn-success w-50 me-2" type="submit">➕ Add</button>
-            <button class="btn btn-secondary w-50" type="button" @click="showAddTherapistModal = false">✖ Cancel</button>
+          <button class="btn btn-success w-50 me-2" type="submit">
+            ➕ Add
+          </button>
+          <button
+            class="btn btn-secondary w-50"
+            type="button"
+            @click="showAddTherapistModal = false"
+          >
+            ✖ Cancel
+          </button>
         </div>
-        </form>
+      </form>
     </div>
-    </div>
+  </div>
 
-    <!-- Edit Therapist Modal -->
-    <div v-if="showEditTherapistModal" class="modal-overlay" @click.self="showEditTherapistModal = false">
-        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%;">
-            <h3 class="text-center mb-4 text-primary fw-bold">Edit Therapist</h3>
-
-            <div class="mb-3">
-            <label class="form-label">Select Therapist</label>
-            <select v-model="selectedTherapistForEdit" class="form-select">
-                <option disabled value="">-- Choose --</option>
-                <option v-for="t in therapists" :key="t.id" :value="t">{{ t.name }}</option>
-            </select>
-            </div>
-
-            <div v-if="selectedTherapistForEdit">
-            <div class="mb-3">
-                <label class="form-label">Full Name</label>
-                <input type="text" v-model="selectedTherapistForEdit.name" class="form-control" placeholder="Enter name" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input type="email" v-model="selectedTherapistForEdit.email" class="form-control" placeholder="Enter email" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label fw-bold">Availability</label>
-
-                <div 
-                    v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" 
-                    :key="day"
-                    class="mb-2"
-                >
-                    <div class="d-flex align-items-center gap-2">
-                    <strong style="width: 90px;">{{ day }}</strong>
-
-                    <input
-                        type="time"
-                        class="form-control form-control-sm"
-                        style="max-width: 130px;"
-                        :value="getDayTime(day, 'start')"
-                        @change="updateAvailability(day, 'start', $event.target.value)"
-                    />
-                    <span>to</span>
-                    <input
-                        type="time"
-                        class="form-control form-control-sm"
-                        style="max-width: 130px;"
-                        :value="getDayTime(day, 'end')"
-                        @change="updateAvailability(day, 'end', $event.target.value)"
-                    />
-                    <button class="btn btn-sm btn-outline-danger" @click="clearAvailability(day)">❌</button>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="mb-3">
-                <label class="form-label">Role</label>
-                <select v-model="selectedTherapistForEdit.role" class="form-select">
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-                </select>
-            </div>
-
-            <!-- Optional future availability editor -->
-
-            <div class="d-flex justify-content-between mt-4">
-                <button class="btn btn-primary w-50 me-2" @click="saveEditedTherapist">💾 Save</button>
-                <button class="btn btn-secondary w-50" @click="showEditTherapistModal = false">✖ Cancel</button>
-            </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Delete Therapist Modal -->
-    <div v-if="showDeleteTherapistModal" class="modal-overlay" @click.self="showDeleteTherapistModal = false">
-        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 420px; max-width: 90%;">
-            <h3 class="text-center mb-4 text-danger fw-bold">Delete Therapist</h3>
-
-            <p class="text-muted text-center mb-3">Select a therapist you wish to remove from the system:</p>
-
-            <ul class="list-group mb-4">
-            <li 
-                v-for="t in therapists" 
-                :key="t.id" 
-                class="list-group-item d-flex justify-content-between align-items-center"
-            >
-                <div>
-                <strong>{{ t.name }}</strong><br />
-                <small class="text-muted">{{ t.email }}</small>
-                </div>
-                <button 
-                class="btn btn-outline-danger btn-sm"
-                @click="deleteTherapist(t.id)"
-                >
-                🗑️ Delete
-                </button>
-            </li>
-            </ul>
-
-            <div class="text-center">
-            <button class="btn btn-secondary w-100" @click="showDeleteTherapistModal = false">✖ Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Change Password Modal -->
-    <div v-if="showChangePasswordModal" class="modal-overlay" @click.self="showChangePasswordModal = false">
-        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%;">
-            <h3 class="text-center text-primary fw-bold mb-4">🔒 Change Password</h3>
-            <form @submit.prevent="submitPasswordChange">
-            <div class="mb-3">
-                <label>New Password</label>
-                <input type="password" v-model="newPassword" class="form-control" required />
-            </div>
-            <div class="mb-3">
-                <label>Confirm Password</label>
-                <input type="password" v-model="confirmPassword" class="form-control" required />
-            </div>
-            <div class="d-flex justify-content-between">
-                <button type="submit" class="btn btn-primary w-50 me-2">Update</button>
-                <button type="button" class="btn btn-secondary w-50" @click="showChangePasswordModal = false">Cancel</button>
-            </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Change Availability Modal -->
-    <div v-if="showChangeAvailabilityModal" class="modal-overlay" @click.self="showChangeAvailabilityModal = false">
-        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 500px; max-width: 95%;">
-            <h3 class="text-center text-success fw-bold mb-4">🗓️ Change Availability</h3>
-            <div v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" :key="day" class="mb-3">
-            <strong>{{ day }}</strong>
-            <div class="d-flex gap-2 mt-1">
-                <input 
-                    type="time" 
-                    class="form-control" 
-                    :value="user.availability[day]?.[0]?.start || ''"
-                    @input="updateUserAvailability(day, 'start', $event.target.value)"
-                />
-                <input 
-                    type="time" 
-                    class="form-control" 
-                    :value="user.availability[day]?.[0]?.end || ''"
-                    @input="updateUserAvailability(day, 'end', $event.target.value)"
-                />
-                <button class="btn btn-outline-danger" @click="clearUserAvailability(day)">❌</button>
-            </div>
-            </div>
-            <div class="d-flex justify-content-between">
-            <button class="btn btn-primary w-50 me-2" @click="submitAvailabilityChange">Save</button>
-            <button class="btn btn-secondary w-50" @click="showChangeAvailabilityModal = false">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Out-Of-Office Modal-->
-    <div v-if="showOutOfOfficeModal" class="modal-overlay" @click.self="showOutOfOfficeModal = false">
-        <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%;">
-            <h3 class="text-center fw-bold text-danger mb-4">Set Out-of-Office</h3>
-            <div class="mb-3">
-                <label>Start Date</label>
-                <input type="date" class="form-control" v-model="user.outOfOffice.start" />
-            </div>
-            <div class="mb-3">
-                <label>Return Date</label>
-                <input type="date" class="form-control" v-model="user.outOfOffice.end" />
-            </div>
-            <div class="d-flex justify-content-between">
-                <button class="btn btn-primary w-50 me-2" @click="submitOutOfOffice">Save</button>
-                <button class="btn btn-secondary w-50" @click="showOutOfOfficeModal = false">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <div 
-        v-if="filteredOutOfOfficeTherapists.length" 
-        class="alert alert-warning mt-3"
+  <!-- Edit Therapist Modal -->
+  <div
+    v-if="showEditTherapistModal"
+    class="modal-overlay"
+    @click.self="showEditTherapistModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 400px; max-width: 90%"
     >
-        <strong>🚫 Unavailable Therapists:</strong>
-        <ul class="mb-0 ps-3">
-            <li v-for="t in filteredOutOfOfficeTherapists" :key="t.id">
-            <strong>{{ t.name }}</strong> :
-            <em>{{ getReturnDate(t.outOfOffice.start) }}</em> 
-            ⇨ 
-            <em>{{ getReturnDate(t.outOfOffice.end) }}</em>
-            </li>
-        </ul>
+      <h3 class="text-center mb-4 text-primary fw-bold">Edit Therapist</h3>
+
+      <div class="mb-3">
+        <label class="form-label">Select Therapist</label>
+        <select v-model="selectedTherapistForEdit" class="form-select">
+          <option disabled value="">-- Choose --</option>
+          <option v-for="t in therapists" :key="t.id" :value="t">
+            {{ t.name }}
+          </option>
+        </select>
+      </div>
+
+      <div v-if="selectedTherapistForEdit">
+        <div class="mb-3">
+          <label class="form-label">Full Name</label>
+          <input
+            type="text"
+            v-model="selectedTherapistForEdit.name"
+            class="form-control"
+            placeholder="Enter name"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input
+            type="email"
+            v-model="selectedTherapistForEdit.email"
+            class="form-control"
+            placeholder="Enter email"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Availability</label>
+
+          <div
+            v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']"
+            :key="day"
+            class="mb-2"
+          >
+            <div class="d-flex align-items-center gap-2">
+              <strong style="width: 90px">{{ day }}</strong>
+
+              <input
+                type="time"
+                class="form-control form-control-sm"
+                style="max-width: 130px"
+                :value="getDayTime(day, 'start')"
+                @change="updateAvailability(day, 'start', $event.target.value)"
+              />
+              <span>to</span>
+              <input
+                type="time"
+                class="form-control form-control-sm"
+                style="max-width: 130px"
+                :value="getDayTime(day, 'end')"
+                @change="updateAvailability(day, 'end', $event.target.value)"
+              />
+              <button
+                class="btn btn-sm btn-outline-danger"
+                @click="clearAvailability(day)"
+              >
+                ❌
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Role</label>
+          <select v-model="selectedTherapistForEdit.role" class="form-select">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <!-- Optional future availability editor -->
+
+        <div class="d-flex justify-content-between mt-4">
+          <button
+            class="btn btn-primary w-50 me-2"
+            @click="saveEditedTherapist"
+          >
+            💾 Save
+          </button>
+          <button
+            class="btn btn-secondary w-50"
+            @click="showEditTherapistModal = false"
+          >
+            ✖ Cancel
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- FullCalendar component -->
-     <HorizontalTherapistWeekView
-        v-if="isHorizontalView"
-        :therapists="therapists.filter(t => t.name !== 'Admin')"
-        :allEvents="filteredEvents"
-    />
+  <!-- Delete Therapist Modal -->
+  <div
+    v-if="showDeleteTherapistModal"
+    class="modal-overlay"
+    @click.self="showDeleteTherapistModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 420px; max-width: 90%"
+    >
+      <h3 class="text-center mb-4 text-danger fw-bold">Delete Therapist</h3>
 
-    <FullCalendar
-        v-else
-        ref="fullCalendar"
-        :options="calendarOptions"
-    />
+      <p class="text-muted text-center mb-3">
+        Select a therapist you wish to remove from the system:
+      </p>
 
-    <!-- Footer -->
-    <footer class="bg-light text-center py-4">
-        <p class="mb-0 text-muted">© 2025 HWG Scheduler. Enjoy!</p>
-    </footer>
+      <ul class="list-group mb-4">
+        <li
+          v-for="t in therapists"
+          :key="t.id"
+          class="list-group-item d-flex justify-content-between align-items-center"
+        >
+          <div>
+            <strong>{{ t.name }}</strong
+            ><br />
+            <small class="text-muted">{{ t.email }}</small>
+          </div>
+          <button
+            class="btn btn-outline-danger btn-sm"
+            @click="deleteTherapist(t.id)"
+          >
+            🗑️ Delete
+          </button>
+        </li>
+      </ul>
+
+      <div class="text-center">
+        <button
+          class="btn btn-secondary w-100"
+          @click="showDeleteTherapistModal = false"
+        >
+          ✖ Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div
+    v-if="showChangePasswordModal"
+    class="modal-overlay"
+    @click.self="showChangePasswordModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 400px; max-width: 90%"
+    >
+      <h3 class="text-center text-primary fw-bold mb-4">🔒 Change Password</h3>
+      <form @submit.prevent="submitPasswordChange">
+        <div class="mb-3">
+          <label>New Password</label>
+          <input
+            type="password"
+            v-model="newPassword"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label>Confirm Password</label>
+          <input
+            type="password"
+            v-model="confirmPassword"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="d-flex justify-content-between">
+          <button type="submit" class="btn btn-primary w-50 me-2">
+            Update
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary w-50"
+            @click="showChangePasswordModal = false"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Change Availability Modal -->
+  <div
+    v-if="showChangeAvailabilityModal"
+    class="modal-overlay"
+    @click.self="showChangeAvailabilityModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 500px; max-width: 95%"
+    >
+      <h3 class="text-center text-success fw-bold mb-4">
+        🗓️ Change Availability
+      </h3>
+      <div
+        v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']"
+        :key="day"
+        class="mb-3"
+      >
+        <strong>{{ day }}</strong>
+        <div class="d-flex gap-2 mt-1">
+          <input
+            type="time"
+            class="form-control"
+            :value="user.availability[day]?.[0]?.start || ''"
+            @input="updateUserAvailability(day, 'start', $event.target.value)"
+          />
+          <input
+            type="time"
+            class="form-control"
+            :value="user.availability[day]?.[0]?.end || ''"
+            @input="updateUserAvailability(day, 'end', $event.target.value)"
+          />
+          <button
+            class="btn btn-outline-danger"
+            @click="clearUserAvailability(day)"
+          >
+            ❌
+          </button>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between">
+        <button
+          class="btn btn-primary w-50 me-2"
+          @click="submitAvailabilityChange"
+        >
+          Save
+        </button>
+        <button
+          class="btn btn-secondary w-50"
+          @click="showChangeAvailabilityModal = false"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Out-Of-Office Modal-->
+  <div
+    v-if="showOutOfOfficeModal"
+    class="modal-overlay"
+    @click.self="showOutOfOfficeModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 400px; max-width: 90%"
+    >
+      <h3 class="text-center fw-bold text-danger mb-4">Set Out-of-Office</h3>
+      <div class="mb-3">
+        <label>Start Date</label>
+        <input
+          type="date"
+          class="form-control"
+          v-model="user.outOfOffice.start"
+        />
+      </div>
+      <div class="mb-3">
+        <label>Return Date</label>
+        <input
+          type="date"
+          class="form-control"
+          v-model="user.outOfOffice.end"
+        />
+      </div>
+      <div class="d-flex justify-content-between">
+        <button class="btn btn-primary w-50 me-2" @click="submitOutOfOffice">
+          Save
+        </button>
+        <button
+          class="btn btn-secondary w-50"
+          @click="showOutOfOfficeModal = false"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    v-if="filteredOutOfOfficeTherapists.length"
+    class="alert alert-warning mt-3"
+  >
+    <strong>🚫 Unavailable Therapists:</strong>
+    <ul class="mb-0 ps-3">
+      <li v-for="t in filteredOutOfOfficeTherapists" :key="t.id">
+        <strong>{{ t.name }}</strong> :
+        <em>{{ getReturnDate(t.outOfOffice.start) }}</em>
+        ⇨
+        <em>{{ getReturnDate(t.outOfOffice.end) }}</em>
+      </li>
+    </ul>
+  </div>
+
+  <!-- FullCalendar component -->
+  <HorizontalTherapistWeekView
+    v-if="isHorizontalView"
+    :therapists="therapists.filter(t => t.name !== 'Admin')"
+    :allEvents="filteredEvents"
+  />
+
+  <FullCalendar v-else ref="fullCalendar" :options="calendarOptions" />
+
+  <!-- Footer -->
+  <footer class="bg-light text-center py-4">
+    <p class="mb-0 text-muted">© 2025 HWG Scheduler. Enjoy!</p>
+  </footer>
 </template>
-    
