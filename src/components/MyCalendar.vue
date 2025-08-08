@@ -1216,7 +1216,7 @@ export default {
       <form @submit.prevent="submitEvent">
         <h2>📅 Schedule A Client</h2>
 
-        <div class="modal-section text-center">
+        <div class="form-group mb-3 d-flex flex-column align-items-center">
           <label class="form-label">Client Name</label>
           <input
             v-model="form.client"
@@ -1292,7 +1292,7 @@ export default {
           />
         </div>
 
-        <div class="modal-section">
+        <div class="form-group mb-3 d-flex flex-column align-items-center">
           <label class="form-label">Frequency</label>
           <select v-model="form.frequency" class="form-select">
             <option value="none">Doesn't repeat</option>
