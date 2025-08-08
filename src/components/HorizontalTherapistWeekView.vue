@@ -42,6 +42,29 @@ export default {
   },
   methods: {
     getCalendarOptions(therapist) {
+      const today = new Date()
+      const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()))
+      const endOfWeek = new Date(startOfWeek)
+      endOfWeek.setDate(endOfWeek.getDate() + 6)
+
+      const sessionEvents = this.allEvents
+        .filter(e => e.extendedProps?.therapist === therapist.name)
+        .map(e => ({
+          ...e,
+          title: e.extendedProps?.client || 'Unknown Client',
+          extendedProps: {
+            ...e.extendedProps,
+            tooltip: `
+              <strong>Client:</strong> ${e.extendedProps?.client || 'Unknown'}<br/>
+              <strong>Service:</strong> ${e.extendedProps?.service || 'N/A'}<br/>
+              <strong>Room:</strong> ${e.extendedProps?.room || 'N/A'}<br/>
+              <strong>Time:</strong> ${formatTime(e.start)} – ${formatTime(e.end)}
+            `
+          }
+        }))
+
+      const backgroundEvents = this.getUnavailableBlocks(therapist, new Date(startOfWeek), new Date(endOfWeek))
+
       return {
         plugins: [timeGridPlugin, interactionPlugin],
         initialView: 'timeGridWeek',
@@ -51,23 +74,9 @@ export default {
         slotMaxTime: '21:00:00',
         slotDuration: '00:30:00',
         height: 280,
-        events: this.allEvents
-          .filter(e => e.extendedProps?.therapist === therapist.name)
-          .map(e => ({
-            ...e,
-            title: e.extendedProps?.client || 'Unknown Client',
-            extendedProps: {
-              ...e.extendedProps,
-              tooltip: `
-                <strong>Client:</strong> ${e.extendedProps?.client || 'Unknown'}<br/>
-                <strong>Service:</strong> ${e.extendedProps?.service || 'N/A'}<br/>
-                <strong>Room:</strong> ${e.extendedProps?.room || 'N/A'}<br/>
-                <strong>Time:</strong> ${formatTime(e.start)} – ${formatTime(e.end)}
-              `
-            }
-          })),
+        events: [...sessionEvents, ...backgroundEvents],
         eventDidMount(info) {
-            tippy(info.el, {
+          tippy(info.el, {
             content: info.event.extendedProps.tooltip,
             allowHTML: true,
             theme: 'light', // optional theme
@@ -77,10 +86,58 @@ export default {
           });
         },
         eventContent(arg) {
-            return { html: `<div>${arg.event.title}</div>` };
-          }
+          return { html: `<div>${arg.event.title}</div>` };
+        }
       }
-    }
+    },
+    getUnavailableBlocks(therapist, startDate, endDate) {
+          const unavailableEvents = [];
+          const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+          for (let d = new Date(startDate); d < endDate; d.setDate(d.getDate() + 1)) {
+            const dayName = dayNames[d.getDay()];
+            const availableBlocks = therapist.availability?.[dayName] || [];
+
+            const fullDayStart = new Date(d);
+            fullDayStart.setHours(7, 0, 0);
+
+            const fullDayEnd = new Date(d);
+            fullDayEnd.setHours(21, 0, 0);
+
+            let lastEnd = new Date(fullDayStart);
+
+            for (const block of availableBlocks) {
+              const blockStart = new Date(d);
+              const [startHour, startMin] = block.start.split(':');
+              blockStart.setHours(+startHour, +startMin);
+
+              if (blockStart > lastEnd) {
+                unavailableEvents.push({
+                  start: new Date(lastEnd),
+                  end: new Date(blockStart),
+                  display: 'background',
+                  classNames: ['unavailable-slot']
+                });
+              }
+
+              const blockEnd = new Date(d);
+              const [endHour, endMin] = block.end.split(':');
+              blockEnd.setHours(+endHour, +endMin);
+              lastEnd = new Date(blockEnd);
+            }
+
+            if (lastEnd < fullDayEnd) {
+              unavailableEvents.push({
+                start: new Date(lastEnd),
+                end: new Date(fullDayEnd),
+                display: 'background',
+                classNames: ['unavailable-slot']
+              });
+            }
+          }
+
+          return unavailableEvents;
+        }
   }
 }
 </script>
@@ -165,6 +222,13 @@ export default {
   border: 1px solid #ccc;
   font-size: 13px;
   line-height: 1.4;
+}
+
+.fc-event.unavailable-slot {
+  background-color: #d3d3d3 !important;
+  opacity: 0.4;
+  border: none;
+  pointer-events: none;
 }
 
 </style>
