@@ -1221,7 +1221,7 @@ export default {
           <input
             v-model="form.client"
             type="text"
-            class="form-control align-items-center w-75"
+            class="form-control text-center w-75"
             placeholder="Enter Client Name"
             required
           />
