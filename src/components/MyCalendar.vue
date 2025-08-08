@@ -378,7 +378,6 @@ export default {
       // Allow selection when viewing "All" therapists
       if (this.selectedTherapist === 'All') return true
       const allowed = this.isWithinTherapistAvailability(selectInfo.start, selectInfo.end)
-      console.log('Clicked slot from:', selectInfo.start, 'to', selectInfo.end, '| Allowed?', allowed)
       return allowed
     },
     closeModal() {
@@ -1250,7 +1249,11 @@ export default {
             <label class="form-label">Service</label>
             <select v-model="form.service" class="form-select w-75" required>
               <option disabled value="">Select a service</option>
-              <option v-for="service in services" :key="service" :value="service">
+              <option
+                v-for="service in services"
+                :key="service"
+                :value="service"
+              >
                 {{ service }}
               </option>
             </select>
@@ -1259,7 +1262,11 @@ export default {
 
         <div class="form-group mb-3 d-flex flex-column align-items-center">
           <label class="form-label">Room</label>
-          <select v-model="form.room" class="form-select w-75 text-center" required>
+          <select
+            v-model="form.room"
+            class="form-select w-75 text-center"
+            required
+          >
             <option disabled value="">Select a room</option>
             <option v-for="(color, name) in rooms" :key="name" :value="name">
               {{ name }}
@@ -1296,8 +1303,14 @@ export default {
         </div>
 
         <div class="d-flex justify-content-between mt-4">
-          <button type="submit" class="btn btn-primary w-50 me-2">✅ Submit</button>
-          <button type="button" class="btn btn-outline-secondary w-50" @click="closeModal">
+          <button type="submit" class="btn btn-primary w-50 me-2">
+            ✅ Submit
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary w-50"
+            @click="closeModal"
+          >
             ❌ Cancel
           </button>
         </div>
@@ -1306,8 +1319,15 @@ export default {
   </div>
 
   <!-- Event Details Modal -->
-  <div v-if="showEventModal" class="modal-overlay" @click.self="showEventModal = false">
-    <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 500px; max-width: 95%">
+  <div
+    v-if="showEventModal"
+    class="modal-overlay"
+    @click.self="showEventModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 500px; max-width: 95%"
+    >
       <h3 class="text-center text-primary fw-bold mb-4">
         {{ editMode ? 'Edit Session 🛠️' : 'Session Details ✍️' }}
       </h3>
@@ -1319,7 +1339,9 @@ export default {
 
         <label>Therapist</label>
         <select class="form-control mb-2" v-model="editForm.therapist">
-          <option v-for="t in therapists" :key="t.id" :value="t.name">{{ t.name }}</option>
+          <option v-for="t in therapists" :key="t.id" :value="t.name">
+            {{ t.name }}
+          </option>
         </select>
 
         <label>Service</label>
@@ -1329,28 +1351,52 @@ export default {
 
         <label>Room</label>
         <select class="form-control mb-2" v-model="editForm.room">
-          <option v-for="(color, name) in rooms" :key="name" :value="name">{{ name }}</option>
+          <option v-for="(color, name) in rooms" :key="name" :value="name">
+            {{ name }}
+          </option>
         </select>
 
         <label>Start Time</label>
-        <flat-pickr class="form-control mb-2" v-model="editForm.start" :config="flatpickrConfig" />
+        <flat-pickr
+          class="form-control mb-2"
+          v-model="editForm.start"
+          :config="flatpickrConfig"
+        />
 
         <label>End Time</label>
-        <flat-pickr class="form-control mb-2" v-model="editForm.end" :config="flatpickrConfig" />
+        <flat-pickr
+          class="form-control mb-2"
+          v-model="editForm.end"
+          :config="flatpickrConfig"
+        />
 
         <div class="d-flex justify-content-between">
-          <button class="btn btn-success w-50 me-2" @click="submitEventEdit">💾 Save</button>
-          <button class="btn btn-secondary w-50" @click="editMode = false">Cancel</button>
+          <button class="btn btn-success w-50 me-2" @click="submitEventEdit">
+            💾 Save
+          </button>
+          <button class="btn btn-secondary w-50" @click="editMode = false">
+            Cancel
+          </button>
         </div>
       </div>
 
       <!-- Read-Only View -->
       <div v-else>
         <ul class="list-unstyled text-start mb-4" style="line-height: 1.8">
-          <li><strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}</li>
-          <li><strong>Therapist:</strong> {{ selectedEvent?.extendedProps?.therapist }}</li>
-          <li><strong>Service:</strong> {{ selectedEvent?.extendedProps?.service }}</li>
-          <li><strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}</li>
+          <li>
+            <strong>Client:</strong> {{ selectedEvent?.extendedProps?.client }}
+          </li>
+          <li>
+            <strong>Therapist:</strong>
+            {{ selectedEvent?.extendedProps?.therapist }}
+          </li>
+          <li>
+            <strong>Service:</strong>
+            {{ selectedEvent?.extendedProps?.service }}
+          </li>
+          <li>
+            <strong>Room:</strong> {{ selectedEvent?.extendedProps?.room }}
+          </li>
           <li>
             <strong>Time:</strong>
             {{ new Date(selectedEvent?.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
@@ -1360,12 +1406,29 @@ export default {
         </ul>
 
         <div class="d-flex flex-wrap justify-content-center gap-2">
-          <button class="btn btn-outline-secondary" @click="editMode = true">✏️ Edit</button>
-          <button class="btn btn-danger" @click="markEventStatus('cancelled')">❌ Cancelled</button>
-          <button class="btn btn-warning text-white" @click="markEventStatus('no-show')">❓ No-Show</button>
-          <button class="btn btn-outline-primary" @click="removeEventStatus">🔄 Clear</button>
-          <button class="btn btn-dark" @click="showEventModal = false">✖ Close</button>
-          <button class="btn btn-outline-danger" @click="deleteEvent" :disabled="deletingEvent">
+          <button class="btn btn-outline-secondary" @click="editMode = true">
+            ✏️ Edit
+          </button>
+          <button class="btn btn-danger" @click="markEventStatus('cancelled')">
+            ❌ Cancelled
+          </button>
+          <button
+            class="btn btn-warning text-white"
+            @click="markEventStatus('no-show')"
+          >
+            ❓ No-Show
+          </button>
+          <button class="btn btn-outline-primary" @click="removeEventStatus">
+            🔄 Clear
+          </button>
+          <button class="btn btn-dark" @click="showEventModal = false">
+            ✖ Close
+          </button>
+          <button
+            class="btn btn-outline-danger"
+            @click="deleteEvent"
+            :disabled="deletingEvent"
+          >
             <span
               v-if="deletingEvent"
               class="spinner-border spinner-border-sm me-2"
@@ -1380,24 +1443,49 @@ export default {
   </div>
 
   <!-- Add New Therapist Modal -->
-  <div v-if="showAddTherapistModal" class="modal-overlay" @click.self="showAddTherapistModal = false">
-    <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%">
+  <div
+    v-if="showAddTherapistModal"
+    class="modal-overlay"
+    @click.self="showAddTherapistModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 400px; max-width: 90%"
+    >
       <h3 class="text-center mb-4 text-success fw-bold">Add New Therapist</h3>
 
       <form @submit.prevent="submitNewTherapist">
         <div class="mb-3">
           <label class="form-label">Full Name</label>
-          <input v-model="newTherapist.name" type="text" class="form-control" placeholder="Enter full name" required />
+          <input
+            v-model="newTherapist.name"
+            type="text"
+            class="form-control"
+            placeholder="Enter full name"
+            required
+          />
         </div>
 
         <div class="mb-3">
           <label class="form-label">Email</label>
-          <input v-model="newTherapist.email" type="email" class="form-control" placeholder="Enter email" required />
+          <input
+            v-model="newTherapist.email"
+            type="email"
+            class="form-control"
+            placeholder="Enter email"
+            required
+          />
         </div>
 
         <div class="mb-3">
           <label class="form-label">Password</label>
-          <input v-model="newTherapist.password" type="password" class="form-control" placeholder="Enter password" required />
+          <input
+            v-model="newTherapist.password"
+            type="password"
+            class="form-control"
+            placeholder="Enter password"
+            required
+          />
         </div>
 
         <div class="mb-3">
@@ -1409,35 +1497,62 @@ export default {
         </div>
 
         <div class="d-flex justify-content-between mt-4">
-          <button class="btn btn-success w-50 me-2" type="submit">➕ Add</button>
-          <button class="btn btn-secondary w-50" type="button" @click="showAddTherapistModal = false">✖ Cancel</button>
+          <button class="btn btn-success w-50 me-2" type="submit">
+            ➕ Add
+          </button>
+          <button
+            class="btn btn-secondary w-50"
+            type="button"
+            @click="showAddTherapistModal = false"
+          >
+            ✖ Cancel
+          </button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- Edit Therapist Modal -->
-  <div v-if="showEditTherapistModal" class="modal-overlay" @click.self="showEditTherapistModal = false">
-    <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%">
+  <div
+    v-if="showEditTherapistModal"
+    class="modal-overlay"
+    @click.self="showEditTherapistModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 400px; max-width: 90%"
+    >
       <h3 class="text-center mb-4 text-primary fw-bold">Edit Therapist</h3>
 
       <div class="mb-3">
         <label class="form-label">Select Therapist</label>
         <select v-model="selectedTherapistForEdit" class="form-select">
           <option disabled value="">-- Choose --</option>
-          <option v-for="t in therapists" :key="t.id" :value="t">{{ t.name }}</option>
+          <option v-for="t in therapists" :key="t.id" :value="t">
+            {{ t.name }}
+          </option>
         </select>
       </div>
 
       <div v-if="selectedTherapistForEdit">
         <div class="mb-3">
           <label class="form-label">Full Name</label>
-          <input type="text" v-model="selectedTherapistForEdit.name" class="form-control" placeholder="Enter name" />
+          <input
+            type="text"
+            v-model="selectedTherapistForEdit.name"
+            class="form-control"
+            placeholder="Enter name"
+          />
         </div>
 
         <div class="mb-3">
           <label class="form-label">Email</label>
-          <input type="email" v-model="selectedTherapistForEdit.email" class="form-control" placeholder="Enter email" />
+          <input
+            type="email"
+            v-model="selectedTherapistForEdit.email"
+            class="form-control"
+            placeholder="Enter email"
+          />
         </div>
 
         <div class="mb-3">
@@ -1465,7 +1580,12 @@ export default {
                 :value="getDayTime(day, 'end')"
                 @change="updateAvailability(day, 'end', $event.target.value)"
               />
-              <button class="btn btn-sm btn-outline-danger" @click="clearAvailability(day)">❌</button>
+              <button
+                class="btn btn-sm btn-outline-danger"
+                @click="clearAvailability(day)"
+              >
+                ❌
+              </button>
             </div>
           </div>
         </div>
@@ -1479,19 +1599,38 @@ export default {
         </div>
 
         <div class="d-flex justify-content-between mt-4">
-          <button class="btn btn-primary w-50 me-2" @click="saveEditedTherapist">💾 Save</button>
-          <button class="btn btn-secondary w-50" @click="showEditTherapistModal = false">✖ Cancel</button>
+          <button
+            class="btn btn-primary w-50 me-2"
+            @click="saveEditedTherapist"
+          >
+            💾 Save
+          </button>
+          <button
+            class="btn btn-secondary w-50"
+            @click="showEditTherapistModal = false"
+          >
+            ✖ Cancel
+          </button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Delete Therapist Modal -->
-  <div v-if="showDeleteTherapistModal" class="modal-overlay" @click.self="showDeleteTherapistModal = false">
-    <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 420px; max-width: 90%">
+  <div
+    v-if="showDeleteTherapistModal"
+    class="modal-overlay"
+    @click.self="showDeleteTherapistModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 420px; max-width: 90%"
+    >
       <h3 class="text-center mb-4 text-danger fw-bold">Delete Therapist</h3>
 
-      <p class="text-muted text-center mb-3">Select a therapist you wish to remove from the system:</p>
+      <p class="text-muted text-center mb-3">
+        Select a therapist you wish to remove from the system:
+      </p>
 
       <ul class="list-group mb-4">
         <li
@@ -1500,44 +1639,89 @@ export default {
           class="list-group-item d-flex justify-content-between align-items-center"
         >
           <div>
-            <strong>{{ t.name }}</strong><br />
+            <strong>{{ t.name }}</strong
+            ><br />
             <small class="text-muted">{{ t.email }}</small>
           </div>
-          <button class="btn btn-outline-danger btn-sm" @click="deleteTherapist(t.id)">🗑️ Delete</button>
+          <button
+            class="btn btn-outline-danger btn-sm"
+            @click="deleteTherapist(t.id)"
+          >
+            🗑️ Delete
+          </button>
         </li>
       </ul>
 
       <div class="text-center">
-        <button class="btn btn-secondary w-100" @click="showDeleteTherapistModal = false">✖ Cancel</button>
+        <button
+          class="btn btn-secondary w-100"
+          @click="showDeleteTherapistModal = false"
+        >
+          ✖ Cancel
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Change Password Modal -->
-  <div v-if="showChangePasswordModal" class="modal-overlay" @click.self="showChangePasswordModal = false">
-    <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%">
+  <div
+    v-if="showChangePasswordModal"
+    class="modal-overlay"
+    @click.self="showChangePasswordModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 400px; max-width: 90%"
+    >
       <h3 class="text-center text-primary fw-bold mb-4">🔒 Change Password</h3>
       <form @submit.prevent="submitPasswordChange">
         <div class="mb-3">
           <label>New Password</label>
-          <input type="password" v-model="newPassword" class="form-control" required />
+          <input
+            type="password"
+            v-model="newPassword"
+            class="form-control"
+            required
+          />
         </div>
         <div class="mb-3">
           <label>Confirm Password</label>
-          <input type="password" v-model="confirmPassword" class="form-control" required />
+          <input
+            type="password"
+            v-model="confirmPassword"
+            class="form-control"
+            required
+          />
         </div>
         <div class="d-flex justify-content-between">
-          <button type="submit" class="btn btn-primary w-50 me-2">Update</button>
-          <button type="button" class="btn btn-secondary w-50" @click="showChangePasswordModal = false">Cancel</button>
+          <button type="submit" class="btn btn-primary w-50 me-2">
+            Update
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary w-50"
+            @click="showChangePasswordModal = false"
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- Change Availability Modal -->
-  <div v-if="showChangeAvailabilityModal" class="modal-overlay" @click.self="showChangeAvailabilityModal = false">
-    <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 500px; max-width: 95%">
-      <h3 class="text-center text-success fw-bold mb-4">🗓️ Change Availability</h3>
+  <div
+    v-if="showChangeAvailabilityModal"
+    class="modal-overlay"
+    @click.self="showChangeAvailabilityModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 500px; max-width: 95%"
+    >
+      <h3 class="text-center text-success fw-bold mb-4">
+        🗓️ Change Availability
+      </h3>
       <div
         v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']"
         :key="day"
@@ -1557,36 +1741,76 @@ export default {
             :value="user.availability[day]?.[0]?.end || ''"
             @input="updateUserAvailability(day, 'end', $event.target.value)"
           />
-          <button class="btn btn-outline-danger" @click="clearUserAvailability(day)">❌</button>
+          <button
+            class="btn btn-outline-danger"
+            @click="clearUserAvailability(day)"
+          >
+            ❌
+          </button>
         </div>
       </div>
       <div class="d-flex justify-content-between">
-        <button class="btn btn-primary w-50 me-2" @click="submitAvailabilityChange">Save</button>
-        <button class="btn btn-secondary w-50" @click="showChangeAvailabilityModal = false">Cancel</button>
+        <button
+          class="btn btn-primary w-50 me-2"
+          @click="submitAvailabilityChange"
+        >
+          Save
+        </button>
+        <button
+          class="btn btn-secondary w-50"
+          @click="showChangeAvailabilityModal = false"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Out-Of-Office Modal-->
-  <div v-if="showOutOfOfficeModal" class="modal-overlay" @click.self="showOutOfOfficeModal = false">
-    <div class="modal-content shadow-lg p-4 rounded bg-white" style="width: 400px; max-width: 90%">
+  <div
+    v-if="showOutOfOfficeModal"
+    class="modal-overlay"
+    @click.self="showOutOfOfficeModal = false"
+  >
+    <div
+      class="modal-content shadow-lg p-4 rounded bg-white"
+      style="width: 400px; max-width: 90%"
+    >
       <h3 class="text-center fw-bold text-danger mb-4">Set Out-of-Office</h3>
       <div class="mb-3">
         <label>Start Date</label>
-        <input type="date" class="form-control" v-model="user.outOfOffice.start" />
+        <input
+          type="date"
+          class="form-control"
+          v-model="user.outOfOffice.start"
+        />
       </div>
       <div class="mb-3">
         <label>Return Date</label>
-        <input type="date" class="form-control" v-model="user.outOfOffice.end" />
+        <input
+          type="date"
+          class="form-control"
+          v-model="user.outOfOffice.end"
+        />
       </div>
       <div class="d-flex justify-content-between">
-        <button class="btn btn-primary w-50 me-2" @click="submitOutOfOffice">Save</button>
-        <button class="btn btn-secondary w-50" @click="showOutOfOfficeModal = false">Cancel</button>
+        <button class="btn btn-primary w-50 me-2" @click="submitOutOfOffice">
+          Save
+        </button>
+        <button
+          class="btn btn-secondary w-50"
+          @click="showOutOfOfficeModal = false"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   </div>
 
-  <div v-if="filteredOutOfOfficeTherapists.length" class="alert alert-warning mt-3">
+  <div
+    v-if="filteredOutOfOfficeTherapists.length"
+    class="alert alert-warning mt-3"
+  >
     <strong>🚫 Unavailable Therapists:</strong>
     <ul class="mb-0 ps-3">
       <li v-for="t in filteredOutOfOfficeTherapists" :key="t.id">
