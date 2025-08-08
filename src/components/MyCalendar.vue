@@ -1362,7 +1362,7 @@ export default {
         <div class="d-flex flex-wrap justify-content-center gap-2">
           <button class="btn btn-outline-secondary" @click="editMode = true">✏️ Edit</button>
           <button class="btn btn-danger" @click="markEventStatus('cancelled')">❌ Cancelled</button>
-          <button class="btn btn.warning text-white" @click="markEventStatus('no-show')">❓ No-Show</button>
+          <button class="btn btn-warning text-white" @click="markEventStatus('no-show')">❓ No-Show</button>
           <button class="btn btn-outline-primary" @click="removeEventStatus">🔄 Clear</button>
           <button class="btn btn-dark" @click="showEventModal = false">✖ Close</button>
           <button class="btn btn-outline-danger" @click="deleteEvent" :disabled="deletingEvent">
