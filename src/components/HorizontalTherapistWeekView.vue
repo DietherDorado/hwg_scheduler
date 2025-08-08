@@ -217,6 +217,14 @@ export default {
   white-space: normal;
 }
 
+.mini-calendar :deep(.fc-event.unavailable-slot) {
+  background-color: #ccc !important;
+  opacity: 0.4 !important;
+  border: none !important;
+  pointer-events: none;
+  color: transparent !important;
+}
+
 /* Add this to your global styles or <style scoped> */
 .tippy-box[data-theme~='light'] {
   border: 1px solid #ccc;
