@@ -1090,7 +1090,7 @@ export default {
             class="btn"
             :class="isHorizontalView ? 'btn-primary' : 'btn-outline-primary'"
             @click="setViewMode('horizontal')"
-        >💫 Horizontal View</button>
+        >💫 Scheduler View</button>
     </div>
 
     <div class="calendar-header d-flex justify-content-between align-items-center mb-3 px-3">
