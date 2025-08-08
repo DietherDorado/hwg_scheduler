@@ -1221,8 +1221,8 @@ export default {
           <input
             v-model="form.client"
             type="text"
-            class="form-control w-75"
-            placeholder="Enter client name"
+            class="form-control align-items-center w-75"
+            placeholder="Enter Client Name"
             required
           />
         </div>
@@ -1232,7 +1232,7 @@ export default {
           <div class="form-group mb-3 d-flex flex-column align-items-center">
             <label class="form-label">Therapist</label>
             <select v-model="form.therapist" class="form-select w-75" required>
-              <option disabled value="">Select a therapist</option>
+              <option disabled value="">Select A Therapist</option>
               <option
                 v-for="therapist in therapists"
                 :key="therapist.id"
@@ -1248,7 +1248,7 @@ export default {
           <div class="form-group mb-3 d-flex flex-column align-items-center">
             <label class="form-label">Service</label>
             <select v-model="form.service" class="form-select w-75" required>
-              <option disabled value="">Select a service</option>
+              <option disabled value="">Select A Service</option>
               <option
                 v-for="service in services"
                 :key="service"
@@ -1267,7 +1267,7 @@ export default {
             class="form-select w-75 text-center"
             required
           >
-            <option disabled value="">Select a room</option>
+            <option disabled value="">Select A Room</option>
             <option v-for="(color, name) in rooms" :key="name" :value="name">
               {{ name }}
             </option>
@@ -1277,17 +1277,17 @@ export default {
         <div class="form-group mb-3 d-flex flex-column align-items-center">
           <label class="form-label">Start Time</label>
           <flat-pickr
-            class="form-control mb-2"
+            class="form-control mb-2 text-center"
             v-model="form.start"
             :config="flatpickrConfig"
-            placeholder="Select start time"
+            placeholder="Select Start Time"
           />
           <label class="form-label">End Time</label>
           <flat-pickr
-            class="form-control mb-2"
+            class="form-control mb-2 text-center"
             v-model="form.end"
             :config="flatpickrConfig"
-            placeholder="Select end time"
+            placeholder="Select End Time"
             :readonly="form.service !== 'Out-Of-Office'"
           />
         </div>
