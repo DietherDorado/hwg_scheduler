@@ -567,7 +567,7 @@ export default {
                 service: event.extendedProps?.service,
                 room: event.extendedProps?.room,
                 frequency: event.extendedProps?.frequency,
-                backgroundColor: event.backgroundColor
+                backgroundColor: roomColor
               })
             }).then(res => res.json())
           )
@@ -580,7 +580,7 @@ export default {
           start: new Date(event.timestart),
           end: new Date(event.timeend),
           extendedProps: { ...event, therapist: event.therapist_name },
-          backgroundColor: event.backgroundColor
+          backgroundColor: roomColor
         }))
         this.$refs.fullCalendar?.getApi?.().refetchEvents()
         this.closeModal()
@@ -1031,7 +1031,7 @@ export default {
           ...event,
           start: new Date(event.timestart),
           end: new Date(event.timeend),
-          backgroundColor: event.backgroundColor,
+          style: {background: event.backgroundColor || this.rooms[event.room] || '#386bff' },
           extendedProps: { ...event, therapist: event.therapist_name }
         }))
 
