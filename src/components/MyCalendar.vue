@@ -282,7 +282,7 @@ export default {
     filteredOutOfOfficeTherapists() {
       const today = new Date()
       const oneWeekFromNow = new Date()
-      oneWeekFromNow.setDate(today.getDate() + 8) // 8 to include today
+      oneWeekFromNow.setDate(today.getDate() + 7)
 
       return this.outOfOfficeTherapists.filter(t => {
         const start = new Date(t.outOfOffice?.start)
@@ -978,8 +978,11 @@ export default {
     },
     getReturnDate(end) {
       if (!end) return ''
-      const date = new Date(end)
-      return date.toLocaleString('en-US', {
+
+      const [year, month, day] = end.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day);
+
+      return localDate.toLocaleString('en-US', {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
