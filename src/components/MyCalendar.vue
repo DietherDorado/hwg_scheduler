@@ -540,7 +540,8 @@ export default {
         events.push({
           start: currentStart.toISOString(),
           end: currentEnd.toISOString(),
-          style: { background: roomColor },
+          backgroundColor: roomColor,
+          borderColor: roomColor,
           extendedProps: {
             therapist: this.form.therapist,
             client: this.form.client,
@@ -562,11 +563,11 @@ export default {
               body: JSON.stringify({
                 timestart: event.start,
                 timeend: event.end,
-                therapist: event.extendedProps?.therapist,
-                client: event.extendedProps?.client,
-                service: event.extendedProps?.service,
-                room: event.extendedProps?.room,
-                frequency: event.extendedProps?.frequency,
+                therapist: event.extendedProps.therapist,
+                client: event.extendedProps.client,
+                service: event.extendedProps.service,
+                room: event.extendedProps.room,
+                frequency: event.extendedProps.frequency,
                 backgroundColor: roomColor
               })
             }).then(res => res.json())
@@ -575,13 +576,17 @@ export default {
 
         // Refresh data
         const data = await authFetch('https://hwg-backend.onrender.com/events').then(r => r.json())
-        this.allEvents = data.map(event => ({
-          ...event,
-          start: new Date(event.timestart),
-          end: new Date(event.timeend),
-          extendedProps: { ...event, therapist: event.therapist_name },
-          backgroundColor: roomColor
-        }))
+        this.allEvents = data.map(event => {
+          const c = event.backgroundColor || this.rooms[event.room] || '#000000'
+          return {
+            ...event,
+            start: new Date(event.timestart),
+            end: new Date(event.timeend),
+            backgroundColor: c,
+            borderColor: c,
+            extendedProps: { ...event, therapist: event.therapist_name }
+          }
+        })
         this.$refs.fullCalendar?.getApi?.().refetchEvents()
         this.closeModal()
       } catch (err) {
