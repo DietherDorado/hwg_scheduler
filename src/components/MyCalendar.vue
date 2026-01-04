@@ -616,7 +616,8 @@ export default {
         this.selectedEvent.setExtendedProp('therapist', updated.therapist)
         this.selectedEvent.setExtendedProp('service', updated.service)
         this.selectedEvent.setExtendedProp('room', updated.room)
-        this.selectedEvent.setProp('style', { background: updated.backgroundColor })
+        this.selectedEvent.setProp('backgroundColor', updated.backgroundColor)
+        this.selectedEvent.setProp('borderColor', updated.backgroundColor)
 
         this.showEventModal = false
         this.editMode = false
