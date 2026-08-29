@@ -518,10 +518,18 @@ export default {
 
       const events = []
 
-      // Prevent scheduling while therapist is OOO
-      if (this.isTherapistOutOfOffice(therapistObj)) {
+      // Prevent scheduling while therapist is OOO,
+      // but allow admins to override
+      if (!this.isAdmin && this.isTherapistOutOfOffice(therapistObj)) {
         this.showToast(`${therapistObj.name} is currently out of office and will return soon!`, 'error')
         return
+      }
+
+      if (this.isAdmin && this.isTherapistOutOfOffice(therapistObj)) {
+        this.showToast(
+          `Admin override: ${therapistObj.name} is currently marked Out of Office.`,
+          'info'
+        )
       }
 
       for (let i = 0; i < repeatCount; i++) {
@@ -1187,7 +1195,6 @@ export default {
         v-for="therapist in therapists"
         :key="therapist.id"
         :value="therapist.name"
-        :disabled="isTherapistOutOfOffice(therapist)"
       >
         {{ therapist.name }}
         <span v-if="isTherapistOutOfOffice(therapist)">🚫</span>
@@ -1240,7 +1247,6 @@ export default {
                 v-for="therapist in therapists"
                 :key="therapist.id"
                 :value="therapist.name"
-                :disabled="isTherapistOutOfOffice(therapist)"
               >
                 {{ therapist.name }}
                 <span v-if="isTherapistOutOfOffice(therapist)">🚫</span>
