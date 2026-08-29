@@ -60,6 +60,8 @@ export default {
       // ---------- Auth / Current User ----------
       user: { outOfOffice: { start: '', end: '' } },
       isAdmin: false,
+      currentTime: new Date(),
+      todayClockInterval: null,
 
       // ---------- Modal / UI State ----------
       showModal: false,
@@ -244,18 +246,111 @@ export default {
       }
     }
 
+    this.todayClockInterval = setInterval(() => {
+      this.currentTime = new Date()
+    }, 60000)
+
     this.calendarOptions.viewDidMount = this.handleViewChange
   },
 
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutsideDropdown)
     document.removeEventListener('click', this.handleClickOutsideProfileDropdown)
+
+    clearInterval(this.todayClockInterval)
   },
 
   // =============================
   // Computed
   // =============================
   computed: {
+    todayEvents(){
+      const now = this.currentTime
+      
+      return this.allEvents.filter(event => {
+        const start = new Date(event.start)
+
+        return (
+          start.getFullYear() === now.getFullYear() &&
+          start.getMonth() === now.getMonth() &&
+          start.getDate() === now.getDate()
+        )
+      })
+    },
+
+    todaySessionCount() {
+      return this.todayEvents.length
+    },
+
+    todayTherapistCount() {
+      const therapistNames = this.todayEvents.map(event => event.extendedProps?.therapist).filter(Boolean)
+      return new Set(therapistNames).size
+    },
+
+    roomsInUseNow() {
+      const now = this.currentTime
+
+      const occupiedRooms = this.todayEvents
+        .filter(event => {
+          const start = new Date(event.start)
+          const end = new Date(event.end)
+
+          return start <= now && now < end
+        })
+        .map(event => event.extendedProps?.room)
+        .filter(room => room && room !== 'Telehealth' && room !== 'Other')
+        
+      return new Set(occupiedRooms).size
+    },
+
+    todayOutOfOfficeCount() {
+      const now = this.currentTime
+
+      return this.therapists.filter(therapist => {
+        if (!therapist.outOfOffice?.start || !therapist.outOfOffice?.end) {
+          return false
+        }
+
+        const startParts = therapist.outOfOffice.start.split('-').map(Number)
+        const endParts = therapist.outOfOffice.end.split('-').map(Number)
+
+        const start = new Date(
+          startParts[0],
+          startParts[1] - 1,
+          startParts[2],
+          0,
+          0,
+          0
+        )
+
+        const end = new Date(
+          endParts[0],
+          endParts[1] - 1,
+          endParts[2],
+          23,
+          59,
+          59
+        )
+
+        return now >= start && now <= end
+      }).length
+    },
+
+    formattedToday() {
+      return this.currentTime.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric'
+      })
+    },
+
+    currentTimeFormatted() {
+      return this.currentTime.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit'
+      })
+    },
+
     dailyGif() {
       const today = new Date().getDay()
       return this.gifsByDay[today]
@@ -1104,6 +1199,73 @@ export default {
 
   <div v-if="isAdmin" class="admin-banner">
     <span>👑 You are logged in as <strong>Admin</strong></span>
+  </div>
+
+  <!-- Today's Schedule Dashboard -->
+  <div class="today-dashboard my-4">
+    <div class="today-dashboard-header">
+      <div>
+        <div class="today-dashboard-title">
+          ☀️ Today at HWG
+        </div>
+
+        <div class="today-dashboard-date">
+          {{ formattedToday }} · {{ currentTimeFormatted }}
+        </div>
+      </div>
+    </div>
+
+    <div class="today-dashboard-grid">
+
+      <div class="today-stat-card">
+        <div class="today-stat-icon">📅</div>
+        <div>
+          <div class="today-stat-number">
+            {{ todaySessionCount }}
+          </div>
+          <div class="today-stat-label">
+            Sessions Today
+          </div>
+        </div>
+      </div>
+
+      <div class="today-stat-card">
+        <div class="today-stat-icon">👩‍⚕️</div>
+        <div>
+          <div class="today-stat-number">
+            {{ todayTherapistCount }}
+          </div>
+          <div class="today-stat-label">
+            Therapists Scheduled
+          </div>
+        </div>
+      </div>
+
+      <div class="today-stat-card">
+        <div class="today-stat-icon">🛋️</div>
+        <div>
+          <div class="today-stat-number">
+            {{ roomsInUseNow }}
+          </div>
+          <div class="today-stat-label">
+            Rooms In Use
+          </div>
+        </div>
+      </div>
+
+      <div class="today-stat-card">
+        <div class="today-stat-icon">🚫</div>
+        <div>
+          <div class="today-stat-number">
+            {{ todayOutOfOfficeCount }}
+          </div>
+          <div class="today-stat-label">
+            Out of Office
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <div
